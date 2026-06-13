@@ -140,7 +140,7 @@ Three things distinguish a design repo from an empty repo:
 
 ## Author
 
-**Sindhuja Sivaraman** · MSc Chemistry · MS Data Science → Senior Chemistry × AI Engineer — HTC Global Services
+**Sindhuja Sivaraman** · MSc Chemistry · MS Data Science → Senior Engineer, AI/ML — HTC Global Services
 [Portfolio](https://coding-chemist.vercel.app) · [GitHub](https://github.com/coding-chemist)
 
 > *Record like Faraday. Search like Google. The work deserves better than a paper notebook.*
