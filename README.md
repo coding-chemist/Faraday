@@ -133,7 +133,7 @@ Three things distinguish a design repo from an empty repo:
 
 ## See also
 
-- [Curie](https://github.com/coding-chemist/Curie) — citation-backed RAG for NMR structure elucidation. Faraday's analytical sibling.
+- [Curie](https://github.com/coding-chemist/Curie) — Citation-backed RAG for NMR structure elucidation. Faraday's analytical sibling.
 - [Darwin](https://github.com/coding-chemist/Darwin) — AI-augmented interview platform. Same architectural restraint, different domain.
 
 ---
