@@ -286,7 +286,7 @@ That's the deliberate architectural restraint. The portfolio signal: *this perso
 
 ## 3. Design language
 
-The reference points: **Adobe Firefly's creative confidence, Apple's intentional minimalism, Notion AI's content-first restraint, Linear's typographic discipline** — but warmed by the **naturalist chemistry-notebook aesthetic** established by Curie and Darwin.
+The reference points: **creative confidence, intentional minimalism, content-first restraint, typographic discipline** — warmed by the **naturalist chemistry-notebook aesthetic** established by Curie and Darwin.
 
 The result should feel like *writing in a beautifully-designed artisanal lab journal that happens to be powered by AI* — not like a SaaS product.
 
@@ -334,7 +334,7 @@ Size scale (modular):
 - Hero negative space: **96px+** top/bottom on landing screens
 - Editor block spacing: **16px** between blocks
 
-The whole product should feel **under-filled, not over-filled**. Apple/Notion-level breathing room.
+The whole product should feel **under-filled, not over-filled** — generous breathing room over information density.
 
 ### 3.0.4 Illustration + visual motif
 
@@ -395,7 +395,7 @@ The aesthetic + capability combination is the wedge.
 ## 3.1 Landing page — Option A (hero-first), LOCKED
 
 ### Layout direction
-**Hero-first.** Single bold gesture above the fold: massive serif headline + a beautifully-rendered Faraday hero illustration + one warm-amber CTA. Workspace utility (recent experiments, Watch sidebar) appears below the fold on scroll. Inspired by Adobe Firefly / Apple research apps.
+**Hero-first.** Single bold gesture above the fold: massive serif headline + a beautifully-rendered Faraday hero illustration + one warm-amber CTA. Workspace utility (recent experiments, Watch sidebar) appears below the fold on scroll.
 
 ### Hero illustration — LOCKED (`faraday-hero.png`)
 The hero is an open hand-bound lab notebook with the analog-to-digital metaphor rendered as image:

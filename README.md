@@ -38,7 +38,7 @@ Faraday's wedge is collapsing that tradeoff with three primitives no ELN ships t
 
 ![Faraday landing](./assets/landing.png)
 
-Chemist at the bench. Fresh-green palette (Health-app, NotebookLM watercolor — explicitly **not** the cream warmth of editorial illustrations). Three feature vignettes orbiting the editor preview, deep-forest CTA.
+Chemist at the bench. Fresh-green palette with soft watercolor backdrop — explicitly **not** the cream warmth of editorial illustrations. Three feature vignettes orbiting the editor preview, deep-forest CTA.
 
 ### Editor
 
@@ -114,7 +114,7 @@ Two completely separate visual registers — locked through 6+ iterations on 202
 
 | Register | Where it lives | Palette |
 |---|---|---|
-| **Product UI** | Landing, editor, Lab Memory screens | Fresh greens — sage `#8FB89A`, mint `#C9E4D2`, forest `#2D6A4F`. Pale powder-white base `#F7FAF6`. Health-app modern. |
+| **Product UI** | Landing, editor, Lab Memory screens | Fresh greens — sage `#8FB89A`, mint `#C9E4D2`, forest `#2D6A4F`. Pale powder-white base `#F7FAF6`. Modern, restrained. |
 | **Editorial illustration** | Architecture diagrams, README heroes, marketing | Cream `#FAF8F3`, naturalist botanical, warm amber. Curie/Darwin's established palette. |
 
 Mixing the two produces *"magazine cover for a SaaS product"* — wrong on both axes. Faraday is product UI, not editorial.
@@ -127,7 +127,7 @@ Three things distinguish a design repo from an empty repo:
 
 1. **Domain depth in the spec.** Real reagent metadata, real NMR file formats, real ALCOA/21 CFR Part 11 awareness, real instrument data structures. The kind of detail that comes from chemistry MSc + cheminformatics years, not from skimming Wikipedia.
 2. **Restraint as a design choice.** Zero agents in v0.1 isn't a limitation — it's a stated architectural decision with a written justification. Agents return in v0.2 (Publication Mode) and v0.3 (Smart Audit) where they earn their latency.
-3. **Visual identity that ships first.** Three Adobe Firefly–tier illustrations locked before line one of code. Design language separated from editorial illustration with a written rule. The repo reads as something Benchling should have built.
+3. **Visual identity that ships first.** Three illustration-grade screen mockups locked before line one of code. Design language separated from editorial illustration with a written rule. The repo reads as something Benchling should have built.
 
 ---
 
