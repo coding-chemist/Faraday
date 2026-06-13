@@ -56,34 +56,9 @@ Natural-language query: *"Show Suzuki couplings where yield was below 70% in the
 
 ## Architecture (v0.1)
 
-**Zero agents in v0.1.** Each feature is a stateless RAG call or structured LLM call. Justification: agentic complexity adds latency and reduces predictability without value at v0.1 scope.
+![Faraday architecture](./assets/architecture.png)
 
-```
-                    ┌─────────────────────────────────┐
-                    │   Editor (React)                │
-                    │   ├── Reagent table             │
-                    │   ├── Checkpoint stream         │
-                    │   ├── Observation blocks        │
-                    │   └── Instrument ingest panel   │
-                    └────────────┬────────────────────┘
-                                 │
-                    ┌────────────▼────────────────────┐
-                    │   Lab Memory (3-mode RAG)       │
-                    │   ├── Watch    (proactive)      │
-                    │   ├── Ask      (NL → chart)     │
-                    │   └── Compare  (structured)     │
-                    └────────────┬────────────────────┘
-                                 │
-            ┌────────────────────┼────────────────────┐
-            │                    │                    │
-   ┌────────▼────────┐  ┌────────▼────────┐  ┌────────▼────────┐
-   │ FAISS index     │  │ Anomaly checks  │  │ LLM (LangChain) │
-   │ sentence-       │  │ ├ stoichiometry │  │ Gemini 2.0 Flash│
-   │ transformers    │  │ ├ SOP deviation │  │   primary       │
-   │ (local, free)   │  │ └ history       │  │ Groq Llama 3.3  │
-   └─────────────────┘  └─────────────────┘  │   fallback      │
-                                             └─────────────────┘
-```
+**Zero agents in v0.1.** Each feature is a stateless RAG call or structured LLM call. Justification: agentic complexity adds latency and reduces predictability without value at v0.1 scope. Agents return in v0.2 (Publication Mode) and v0.3 (Smart Audit) where they earn their latency.
 
 Same stack as [Curie](https://github.com/coding-chemist/Curie) — RAG primitive proven, ALCOA/21 CFR Part 11 awareness baked in, instrument data ingest from cheminformatics background.
 
