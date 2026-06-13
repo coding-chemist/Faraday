@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.tmp
+~$*
+.vscode/
+.idea/
+node_modules/
+__pycache__/
+*.pyc
+.env
+.env.local
