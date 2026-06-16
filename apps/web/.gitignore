@@ -4,5 +4,9 @@ dist/
 *.local
 .env
 .env.local
-
 .vercel
+
+# TypeScript incremental build cache + compiled output
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
