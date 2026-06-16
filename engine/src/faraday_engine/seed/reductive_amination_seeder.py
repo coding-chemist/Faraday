@@ -1,34 +1,53 @@
 """Reductive amination seeder. 40 experiments.
 
-Fit considers reductant suitability for the carbonyl type (STAB is gold standard for
-ketones+amines; NaBH3CN tolerates acid; NaBH4 is fine for aldehydes but bad for
-hindered ketones), and solvent compatibility (DCE/DCM for STAB; MeOH for NaBH3CN).
+STAB/DCE gold standard for ketones. NaBH3CN tolerates acid. NaBH4 fine for aldehydes,
+poor for hindered ketones. Fit declared in _FIT_RULES.
 """
+from dataclasses import dataclass
 from datetime import timedelta
 
-from faraday_engine.domain.experiment import (
-    Experiment,
-    ExperimentStatus,
-    ExperimentType,
-    Reagent,
-    ReagentRole,
-    Result,
-)
-from faraday_engine.seed.base import ExperimentSeeder, SeederRegistry
-from faraday_engine.seed.building_blocks import AMINES, CARBONYLS
-from faraday_engine.seed.distributions import (
-    correlated_yield,
-    date_in_last_n_months,
-    gaussian_clamped,
-    lognormal_time,
-    weighted_choice,
-)
-from faraday_engine.seed.reagent_library import (
-    APROTIC_SOLVENTS,
-    HYDRIDE_REDUCTANTS,
-    PROTIC_SOLVENTS,
-    RA_ACIDS,
-)
+from faraday_engine.domain.experiment import Experiment
+from faraday_engine.domain.experiment import ExperimentStatus
+from faraday_engine.domain.experiment import ExperimentType
+from faraday_engine.domain.experiment import Reagent
+from faraday_engine.domain.experiment import ReagentRole
+from faraday_engine.domain.experiment import Result
+from faraday_engine.seed.base import ExperimentSeeder
+from faraday_engine.seed.base import SeederRegistry
+from faraday_engine.seed.building_blocks import AMINES
+from faraday_engine.seed.building_blocks import CARBONYLS
+from faraday_engine.seed.building_blocks import BuildingBlock
+from faraday_engine.seed.distributions import correlated_yield
+from faraday_engine.seed.distributions import date_in_last_n_months
+from faraday_engine.seed.distributions import gaussian_clamped
+from faraday_engine.seed.distributions import lognormal_time
+from faraday_engine.seed.distributions import weighted_choice
+from faraday_engine.seed.fit_rules import FitRule
+from faraday_engine.seed.fit_rules import compute_fit
+from faraday_engine.seed.reagent_library import APROTIC_SOLVENTS
+from faraday_engine.seed.reagent_library import ChemReagent
+from faraday_engine.seed.reagent_library import HYDRIDE_REDUCTANTS
+from faraday_engine.seed.reagent_library import PROTIC_SOLVENTS
+from faraday_engine.seed.reagent_library import RA_ACIDS
+
+
+@dataclass(frozen=True)
+class _ReductiveAminationContext:
+    carbonyl: BuildingBlock
+    amine: BuildingBlock
+    reductant: ChemReagent
+    solvent: ChemReagent
+    use_acid: bool
+
+
+_FIT_RULES: list[FitRule] = [
+    FitRule(lambda c: c.reductant.name == "sodium triacetoxyborohydride" and "ketone" in c.carbonyl.class_tags, 0.35, "STAB on ketones is gold standard"),
+    FitRule(lambda c: c.reductant.name == "sodium triacetoxyborohydride" and c.solvent.name in {"dichloromethane", "1,2-dichloroethane"}, 0.20, "STAB in DCM/DCE textbook combo"),
+    FitRule(lambda c: c.reductant.name == "sodium cyanoborohydride" and c.use_acid, 0.15, "NaBH3CN works best at low pH"),
+    FitRule(lambda c: c.reductant.name == "sodium borohydride" and "ketone" in c.carbonyl.class_tags, -0.30, "NaBH4 over-reduces or fails on hindered ketones"),
+    FitRule(lambda c: "aldehyde" in c.carbonyl.class_tags, 0.15, "aldehydes are more reactive than ketones"),
+    FitRule(lambda c: "small" in c.carbonyl.class_tags and "primary_amine" in c.amine.class_tags, 0.10, "small carbonyl + primary amine kinetically favorable"),
+]
 
 
 @SeederRegistry.register(ExperimentType.REDUCTIVE_AMINATION, count=40)
@@ -38,19 +57,14 @@ class ReductiveAminationSeeder(ExperimentSeeder):
 
         carbonyl = weighted_choice(rng, [(c, 1.0) for c in CARBONYLS])
         amine = weighted_choice(rng, [(a, 1.0) for a in AMINES])
-        # Reductive amination reductants are a subset
         ra_reductants = [(r, w) for r, w in HYDRIDE_REDUCTANTS if r.name in {
             "sodium triacetoxyborohydride", "sodium cyanoborohydride", "sodium borohydride",
         }]
         reductant = weighted_choice(rng, ra_reductants)
 
-        # Solvent depends on reductant
         if reductant.name == "sodium triacetoxyborohydride":
             solvent = weighted_choice(rng, [(s, w) for s, w in APROTIC_SOLVENTS
                                             if s.name in {"dichloromethane", "1,2-dichloroethane"}])
-        elif reductant.name == "sodium cyanoborohydride":
-            solvent = weighted_choice(rng, [(s, w) for s, w in PROTIC_SOLVENTS
-                                            if s.name in {"methanol", "ethanol"}])
         else:
             solvent = weighted_choice(rng, [(s, w) for s, w in PROTIC_SOLVENTS
                                             if s.name in {"methanol", "ethanol"}])
@@ -58,20 +72,8 @@ class ReductiveAminationSeeder(ExperimentSeeder):
         use_acid = rng.random() < 0.65
         acid = weighted_choice(rng, RA_ACIDS) if use_acid else None
 
-        fit = 0.0
-        if reductant.name == "sodium triacetoxyborohydride" and "ketone" in carbonyl.class_tags:
-            fit += 0.35  # STAB on ketones is gold standard
-        if reductant.name == "sodium triacetoxyborohydride" and solvent.name in {"dichloromethane", "1,2-dichloroethane"}:
-            fit += 0.2
-        if reductant.name == "sodium cyanoborohydride" and use_acid:
-            fit += 0.15  # NaBH3CN works best at low pH
-        if reductant.name == "sodium borohydride" and "ketone" in carbonyl.class_tags:
-            fit -= 0.3  # NaBH4 over-reduces or fails on hindered ketones
-        if "aldehyde" in carbonyl.class_tags:
-            fit += 0.15  # aldehydes are more reactive
-        if "small" in carbonyl.class_tags and "primary_amine" in amine.class_tags:
-            fit += 0.1
-        fit = max(-1.0, min(1.0, fit))
+        ctx = _ReductiveAminationContext(carbonyl, amine, reductant, solvent, use_acid)
+        fit = compute_fit(ctx, _FIT_RULES)
 
         substrate_mmol = round(rng.uniform(0.5, 3.0), 2)
         amine_eq = round(rng.uniform(1.0, 1.5), 2)
@@ -80,24 +82,7 @@ class ReductiveAminationSeeder(ExperimentSeeder):
         temp = gaussian_clamped(rng, mu=22.0, sigma=3.0, low=0.0, high=40.0)
         time_min = lognormal_time(rng, median_h=12.0, sigma=0.5)
 
-        roll = rng.random()
-        if roll < 0.05:
-            status, yield_pct, result_notes = ExperimentStatus.IN_PROGRESS, None, None
-        elif roll < 0.11:
-            status, yield_pct, result_notes = ExperimentStatus.FAILED, None, rng.choice([
-                "Carbonyl reduction product (alcohol) dominant — wrong reductant choice.",
-                "Imine never formed cleanly. Carbonyl recovered.",
-                "Dialkylation observed (2:1 amine:aldehyde adduct).",
-            ])
-        else:
-            status = ExperimentStatus.COMPLETED
-            yield_pct = correlated_yield(rng, fit, base_mu=75.0, base_sigma=12.0)
-            result_notes = rng.choice([
-                "Quenched with sat. NaHCO3, extracted with DCM, dried, concentrated.",
-                "Filtered through silica plug, then column chromatography (MeOH/DCM).",
-                "Acid/base extraction to isolate amine product.",
-            ])
-
+        status, yield_pct, result_notes = _resolve_outcome(rng, fit)
         started = date_in_last_n_months(rng, 12)
         completed = started + timedelta(minutes=time_min) if status == ExperimentStatus.COMPLETED else None
 
@@ -122,7 +107,7 @@ class ReductiveAminationSeeder(ExperimentSeeder):
 
         result = None
         if status == ExperimentStatus.COMPLETED:
-            product_mw_approx = carbonyl.mw + amine.mw - 16  # condensation: -H2O, +H2
+            product_mw_approx = carbonyl.mw + amine.mw - 16
             product_mass = round(substrate_mmol * (yield_pct / 100) * product_mw_approx / 1000, 3)
             result = Result(
                 yield_pct=yield_pct,
@@ -153,3 +138,22 @@ class ReductiveAminationSeeder(ExperimentSeeder):
             reagents=reagents,
             result=result,
         )
+
+
+def _resolve_outcome(rng, fit: float):
+    roll = rng.random()
+    if roll < 0.05:
+        return ExperimentStatus.IN_PROGRESS, None, None
+    if roll < 0.11:
+        return ExperimentStatus.FAILED, None, rng.choice([
+            "Carbonyl reduction product (alcohol) dominant — wrong reductant choice.",
+            "Imine never formed cleanly. Carbonyl recovered.",
+            "Dialkylation observed (2:1 amine:aldehyde adduct).",
+        ])
+    y = correlated_yield(rng, fit, base_mu=75.0, base_sigma=12.0)
+    notes = rng.choice([
+        "Quenched with sat. NaHCO3, extracted with DCM, dried, concentrated.",
+        "Filtered through silica plug, then column chromatography (MeOH/DCM).",
+        "Acid/base extraction to isolate amine product.",
+    ])
+    return ExperimentStatus.COMPLETED, y, notes

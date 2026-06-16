@@ -1,34 +1,55 @@
 """Buchwald-Hartwig amination seeder. 30 experiments.
 
-Buchwald is sensitive to base choice (strong alkoxide bases preferred), ligand
-(BINAP/XPhos for hindered amines), and solvent (toluene/dioxane standard).
+Sensitive to base (strong alkoxide preferred), ligand (BINAP/XPhos for hindered amines),
+and solvent (toluene/dioxane standard). Condition fit declared in _FIT_RULES.
 """
+from dataclasses import dataclass
 from datetime import timedelta
 
-from faraday_engine.domain.experiment import (
-    Experiment,
-    ExperimentStatus,
-    ExperimentType,
-    Reagent,
-    ReagentRole,
-    Result,
-)
-from faraday_engine.seed.base import ExperimentSeeder, SeederRegistry
-from faraday_engine.seed.building_blocks import AMINES, ARYL_HALIDES
-from faraday_engine.seed.distributions import (
-    correlated_yield,
-    date_in_last_n_months,
-    gaussian_clamped,
-    lognormal_time,
-    weighted_choice,
-)
-from faraday_engine.seed.reagent_library import (
-    APROTIC_SOLVENTS,
-    INERT_ATMOSPHERES,
-    LIGANDS_FOR_PD,
-    PD_CATALYSTS,
-    STRONG_BASES,
-)
+from faraday_engine.domain.experiment import Experiment
+from faraday_engine.domain.experiment import ExperimentStatus
+from faraday_engine.domain.experiment import ExperimentType
+from faraday_engine.domain.experiment import Reagent
+from faraday_engine.domain.experiment import ReagentRole
+from faraday_engine.domain.experiment import Result
+from faraday_engine.seed.base import ExperimentSeeder
+from faraday_engine.seed.base import SeederRegistry
+from faraday_engine.seed.building_blocks import AMINES
+from faraday_engine.seed.building_blocks import ARYL_HALIDES
+from faraday_engine.seed.building_blocks import BuildingBlock
+from faraday_engine.seed.distributions import correlated_yield
+from faraday_engine.seed.distributions import date_in_last_n_months
+from faraday_engine.seed.distributions import gaussian_clamped
+from faraday_engine.seed.distributions import lognormal_time
+from faraday_engine.seed.distributions import weighted_choice
+from faraday_engine.seed.fit_rules import FitRule
+from faraday_engine.seed.fit_rules import compute_fit
+from faraday_engine.seed.reagent_library import APROTIC_SOLVENTS
+from faraday_engine.seed.reagent_library import ChemReagent
+from faraday_engine.seed.reagent_library import INERT_ATMOSPHERES
+from faraday_engine.seed.reagent_library import LIGANDS_FOR_PD
+from faraday_engine.seed.reagent_library import PD_CATALYSTS
+from faraday_engine.seed.reagent_library import STRONG_BASES
+
+
+@dataclass(frozen=True)
+class _BuchwaldContext:
+    aryl: BuildingBlock
+    amine: BuildingBlock
+    pd: ChemReagent
+    ligand: ChemReagent
+    base: ChemReagent
+    solvent: ChemReagent
+
+
+_FIT_RULES: list[FitRule] = [
+    FitRule(lambda c: "primary_amine" in c.amine.class_tags and "aromatic" not in c.amine.class_tags, 0.25, "primary alkyl amines couple easily"),
+    FitRule(lambda c: "secondary_amine" in c.amine.class_tags and c.ligand.name in {"XPhos", "SPhos", "BINAP"}, 0.30, "secondary amines need bulky ligand"),
+    FitRule(lambda c: "aromatic" in c.amine.class_tags and c.ligand.name == "BINAP", 0.35, "BINAP is classical for anilines"),
+    FitRule(lambda c: "hindered" in c.aryl.class_tags and c.ligand.name not in {"XPhos", "SPhos"}, -0.40, "hindered ArX without bulky ligand fails"),
+    FitRule(lambda c: "aryl_chloride" in c.aryl.class_tags and c.ligand.name not in {"XPhos", "SPhos"}, -0.60, "ArCl without bulky electron-rich ligand"),
+    FitRule(lambda c: "heterocycle" in c.aryl.class_tags, -0.10, "heterocyclic ArX trickier in Buchwald"),
+]
 
 
 @SeederRegistry.register(ExperimentType.BUCHWALD_HARTWIG, count=30)
@@ -38,25 +59,15 @@ class BuchwaldSeeder(ExperimentSeeder):
 
         aryl = weighted_choice(rng, [(b, 1.0) for b in ARYL_HALIDES if "aryl_iodide" not in b.class_tags])
         amine = weighted_choice(rng, [(a, 1.0) for a in AMINES])
-        pd = weighted_choice(rng, [(p, w) for p, w in PD_CATALYSTS if "Pd2(dba)3" in p.name or "XPhos" in p.name or "acetate" in p.name])
-        ligand = weighted_choice(rng, [(l, w) for l, w in LIGANDS_FOR_PD if l.name != "triphenylphosphine"])
+        pd = weighted_choice(rng, [(p, w) for p, w in PD_CATALYSTS
+                                   if "Pd2(dba)3" in p.name or "XPhos" in p.name or "acetate" in p.name])
+        ligand = weighted_choice(rng, [(lig, w) for lig, w in LIGANDS_FOR_PD if lig.name != "triphenylphosphine"])
         base = weighted_choice(rng, STRONG_BASES)
-        solvent = weighted_choice(rng, [(s, w) for s, w in APROTIC_SOLVENTS if s.name in {"toluene", "1,4-dioxane", "tetrahydrofuran"}])
+        solvent = weighted_choice(rng, [(s, w) for s, w in APROTIC_SOLVENTS
+                                        if s.name in {"toluene", "1,4-dioxane", "tetrahydrofuran"}])
 
-        fit = 0.0
-        if "primary_amine" in amine.class_tags and "aromatic" not in amine.class_tags:
-            fit += 0.25  # primary alkyl amines couple easily
-        if "secondary_amine" in amine.class_tags and ligand.name in {"XPhos", "SPhos", "BINAP"}:
-            fit += 0.3
-        if "aromatic" in amine.class_tags and ligand.name == "BINAP":
-            fit += 0.35  # BINAP is classical for anilines
-        if "hindered" in aryl.class_tags and ligand.name not in {"XPhos", "SPhos"}:
-            fit -= 0.4
-        if "aryl_chloride" in aryl.class_tags and ligand.name not in {"XPhos", "SPhos"}:
-            fit -= 0.6
-        if "heterocycle" in aryl.class_tags:
-            fit -= 0.1  # heterocyclic ArX often trickier in Buchwald
-        fit = max(-1.0, min(1.0, fit))
+        ctx = _BuchwaldContext(aryl, amine, pd, ligand, base, solvent)
+        fit = compute_fit(ctx, _FIT_RULES)
 
         substrate_mmol = round(rng.uniform(0.5, 3.0), 2)
         amine_eq = round(rng.uniform(1.1, 1.5), 2)
@@ -66,24 +77,7 @@ class BuchwaldSeeder(ExperimentSeeder):
         temp = gaussian_clamped(rng, mu=95.0, sigma=10.0, low=70.0, high=120.0)
         time_min = lognormal_time(rng, median_h=18.0, sigma=0.5)
 
-        roll = rng.random()
-        if roll < 0.05:
-            status, yield_pct, result_notes = ExperimentStatus.IN_PROGRESS, None, None
-        elif roll < 0.13:
-            status, yield_pct, result_notes = ExperimentStatus.FAILED, None, rng.choice([
-                "Significant homocoupling and dehalogenation observed.",
-                "No conversion after 24h. Tried higher catalyst loading — still no product.",
-                "Amine reacted with base. Restarted with milder conditions in separate experiment.",
-            ])
-        else:
-            status = ExperimentStatus.COMPLETED
-            yield_pct = correlated_yield(rng, fit, base_mu=68.0, base_sigma=14.0)
-            result_notes = rng.choice([
-                "Worked up with brine, extracted with EtOAc. Column purified.",
-                "Crude purified by silica chromatography (5% MeOH/DCM).",
-                "Acid/base extraction to remove unreacted amine, then column.",
-            ])
-
+        status, yield_pct, result_notes = _resolve_outcome(rng, fit)
         started = date_in_last_n_months(rng, 12)
         completed = started + timedelta(minutes=time_min) if status == ExperimentStatus.COMPLETED else None
 
@@ -138,3 +132,22 @@ class BuchwaldSeeder(ExperimentSeeder):
             reagents=reagents,
             result=result,
         )
+
+
+def _resolve_outcome(rng, fit: float):
+    roll = rng.random()
+    if roll < 0.05:
+        return ExperimentStatus.IN_PROGRESS, None, None
+    if roll < 0.13:
+        return ExperimentStatus.FAILED, None, rng.choice([
+            "Significant homocoupling and dehalogenation observed.",
+            "No conversion after 24h. Tried higher catalyst loading — still no product.",
+            "Amine reacted with base. Restarted with milder conditions in separate experiment.",
+        ])
+    y = correlated_yield(rng, fit, base_mu=68.0, base_sigma=14.0)
+    notes = rng.choice([
+        "Worked up with brine, extracted with EtOAc. Column purified.",
+        "Crude purified by silica chromatography (5% MeOH/DCM).",
+        "Acid/base extraction to remove unreacted amine, then column.",
+    ])
+    return ExperimentStatus.COMPLETED, y, notes

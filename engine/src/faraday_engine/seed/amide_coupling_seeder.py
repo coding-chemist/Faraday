@@ -1,35 +1,54 @@
-"""Amide coupling seeder. 60 experiments — most common reaction in real medchem labs.
+"""Amide coupling seeder. 60 experiments — #1 reaction in medchem volume.
 
-Fit considers coupling-reagent quality (HATU/T3P > EDC for hindered partners), base
-appropriateness (DIPEA beats Et3N for sluggish couplings), and substrate match (Boc-amino
-acids couple cleanly; sterically hindered acids need T3P/PyBOP). HOBt is added with EDC
-to suppress racemization.
+HATU/T3P > EDC for hindered partners. DIPEA preferred. HOBt added with carbodiimides.
+Fit declared in _FIT_RULES — adding chemistry rule = one line.
 """
+from dataclasses import dataclass
 from datetime import timedelta
 
-from faraday_engine.domain.experiment import (
-    Experiment,
-    ExperimentStatus,
-    ExperimentType,
-    Reagent,
-    ReagentRole,
-    Result,
-)
-from faraday_engine.seed.base import ExperimentSeeder, SeederRegistry
-from faraday_engine.seed.building_blocks import AMINES, CARBOXYLIC_ACIDS
-from faraday_engine.seed.distributions import (
-    correlated_yield,
-    date_in_last_n_months,
-    gaussian_clamped,
-    lognormal_time,
-    weighted_choice,
-)
-from faraday_engine.seed.reagent_library import (
-    AMIDE_COUPLING_REAGENTS,
-    AMINE_BASES,
-    APROTIC_SOLVENTS,
-    HOBT_ADDITIVES,
-)
+from faraday_engine.domain.experiment import Experiment
+from faraday_engine.domain.experiment import ExperimentStatus
+from faraday_engine.domain.experiment import ExperimentType
+from faraday_engine.domain.experiment import Reagent
+from faraday_engine.domain.experiment import ReagentRole
+from faraday_engine.domain.experiment import Result
+from faraday_engine.seed.base import ExperimentSeeder
+from faraday_engine.seed.base import SeederRegistry
+from faraday_engine.seed.building_blocks import AMINES
+from faraday_engine.seed.building_blocks import CARBOXYLIC_ACIDS
+from faraday_engine.seed.building_blocks import BuildingBlock
+from faraday_engine.seed.distributions import correlated_yield
+from faraday_engine.seed.distributions import date_in_last_n_months
+from faraday_engine.seed.distributions import gaussian_clamped
+from faraday_engine.seed.distributions import lognormal_time
+from faraday_engine.seed.distributions import weighted_choice
+from faraday_engine.seed.fit_rules import FitRule
+from faraday_engine.seed.fit_rules import compute_fit
+from faraday_engine.seed.reagent_library import AMIDE_COUPLING_REAGENTS
+from faraday_engine.seed.reagent_library import AMINE_BASES
+from faraday_engine.seed.reagent_library import APROTIC_SOLVENTS
+from faraday_engine.seed.reagent_library import ChemReagent
+from faraday_engine.seed.reagent_library import HOBT_ADDITIVES
+
+
+@dataclass(frozen=True)
+class _AmideContext:
+    acid: BuildingBlock
+    amine: BuildingBlock
+    coupler: ChemReagent
+    base: ChemReagent
+    solvent: ChemReagent
+    use_hobt: bool
+
+
+_FIT_RULES: list[FitRule] = [
+    FitRule(lambda c: c.coupler.name in {"HATU", "T3P"}, 0.35, "HATU/T3P high-yielding workhorses"),
+    FitRule(lambda c: c.coupler.name == "EDC hydrochloride" and c.use_hobt, 0.15, "EDC + HOBt reliable, suppresses racemization"),
+    FitRule(lambda c: "amino_acid" in c.acid.class_tags and c.coupler.name == "HATU", 0.20, "HATU is the gold standard for peptide couplings"),
+    FitRule(lambda c: "hindered" in c.amine.class_tags and c.coupler.name in {"T3P", "PyBOP"}, 0.25, "bulky-tolerant couplers handle hindered amines"),
+    FitRule(lambda c: "aromatic" in c.amine.class_tags and "primary_amine" in c.amine.class_tags, -0.20, "anilines are sluggish nucleophiles"),
+    FitRule(lambda c: c.base.name == "N,N-diisopropylethylamine", 0.10, "DIPEA (Hünig's base) preferred"),
+]
 
 
 @SeederRegistry.register(ExperimentType.AMIDE_COUPLING, count=60)
@@ -45,24 +64,10 @@ class AmideCouplingSeeder(ExperimentSeeder):
             "N,N-dimethylformamide", "dichloromethane", "N-methyl-2-pyrrolidinone",
             "tetrahydrofuran", "acetonitrile"
         }])
-
-        # HOBt usually added with EDC/DCC carbodiimides
         use_hobt = coupler.name in {"EDC hydrochloride", "DCC"}
 
-        fit = 0.0
-        if coupler.name in {"HATU", "T3P"}:
-            fit += 0.35  # high-yielding workhorses
-        if coupler.name in {"EDC hydrochloride"} and use_hobt:
-            fit += 0.15  # EDC+HOBt is reliable
-        if "amino_acid" in acid.class_tags and coupler.name == "HATU":
-            fit += 0.2  # HATU is the gold standard for peptide couplings
-        if "hindered" in amine.class_tags and coupler.name in {"T3P", "PyBOP"}:
-            fit += 0.25
-        if "aromatic" in amine.class_tags and "primary_amine" in amine.class_tags:
-            fit -= 0.2  # anilines are sluggish nucleophiles
-        if base.name == "N,N-diisopropylethylamine":
-            fit += 0.1
-        fit = max(-1.0, min(1.0, fit))
+        ctx = _AmideContext(acid, amine, coupler, base, solvent, use_hobt)
+        fit = compute_fit(ctx, _FIT_RULES)
 
         substrate_mmol = round(rng.uniform(0.2, 5.0), 2)
         amine_eq = round(rng.uniform(1.0, 1.3), 2)
@@ -71,25 +76,7 @@ class AmideCouplingSeeder(ExperimentSeeder):
         temp = gaussian_clamped(rng, mu=22.0, sigma=4.0, low=0.0, high=40.0)
         time_min = lognormal_time(rng, median_h=6.0, sigma=0.6)
 
-        roll = rng.random()
-        if roll < 0.04:
-            status, yield_pct, result_notes = ExperimentStatus.IN_PROGRESS, None, None
-        elif roll < 0.09:
-            status, yield_pct, result_notes = ExperimentStatus.FAILED, None, rng.choice([
-                "Significant epimerization detected by chiral HPLC. Aborted.",
-                "Activated ester decomposed before amine addition.",
-                "No conversion. Carboxylic acid recovered quantitatively.",
-            ])
-        else:
-            status = ExperimentStatus.COMPLETED
-            yield_pct = correlated_yield(rng, fit, base_mu=82.0, base_sigma=10.0)
-            result_notes = rng.choice([
-                "Quenched with water, extracted with EtOAc, washed with sat. NaHCO3 and brine.",
-                "Acidic and basic aqueous washes to remove HOBt and unreacted amine.",
-                "Direct purification by reverse-phase HPLC (0.1% formic acid).",
-                "Crystallized from EtOAc/hexanes.",
-            ])
-
+        status, yield_pct, result_notes = _resolve_outcome(rng, fit)
         started = date_in_last_n_months(rng, 12)
         completed = started + timedelta(minutes=time_min) if status == ExperimentStatus.COMPLETED else None
 
@@ -119,7 +106,7 @@ class AmideCouplingSeeder(ExperimentSeeder):
 
         result = None
         if status == ExperimentStatus.COMPLETED:
-            product_mw_approx = acid.mw + amine.mw - 18  # condensation: -H2O
+            product_mw_approx = acid.mw + amine.mw - 18
             product_mass = round(substrate_mmol * (yield_pct / 100) * product_mw_approx / 1000, 3)
             result = Result(
                 yield_pct=yield_pct,
@@ -150,3 +137,23 @@ class AmideCouplingSeeder(ExperimentSeeder):
             reagents=reagents,
             result=result,
         )
+
+
+def _resolve_outcome(rng, fit: float):
+    roll = rng.random()
+    if roll < 0.04:
+        return ExperimentStatus.IN_PROGRESS, None, None
+    if roll < 0.09:
+        return ExperimentStatus.FAILED, None, rng.choice([
+            "Significant epimerization detected by chiral HPLC. Aborted.",
+            "Activated ester decomposed before amine addition.",
+            "No conversion. Carboxylic acid recovered quantitatively.",
+        ])
+    y = correlated_yield(rng, fit, base_mu=82.0, base_sigma=10.0)
+    notes = rng.choice([
+        "Quenched with water, extracted with EtOAc, washed with sat. NaHCO3 and brine.",
+        "Acidic and basic aqueous washes to remove HOBt and unreacted amine.",
+        "Direct purification by reverse-phase HPLC (0.1% formic acid).",
+        "Crystallized from EtOAc/hexanes.",
+    ])
+    return ExperimentStatus.COMPLETED, y, notes
