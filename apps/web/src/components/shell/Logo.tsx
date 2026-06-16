@@ -32,12 +32,12 @@ export function Logo({ size = 56 }: Props) {
         component="span"
         sx={{
           fontFamily: faradayTokens.font.display,
-          fontSize: size * 0.62,
+          fontSize: size * 0.6,
           fontWeight: 600,
           color: "#FFFFFF",
           lineHeight: 1,
-          // Slight optical lift so the F sits centred above the letterform's descent
-          transform: "translateY(2%)",
+          // Shift left + tiny down for breathing room next to the sparkle
+          transform: "translate(-7%, 2%)",
         }}
       >
         F
@@ -45,10 +45,10 @@ export function Logo({ size = 56 }: Props) {
       <AutoAwesomeIcon
         sx={{
           position: "absolute",
-          top: size * 0.18,
-          right: size * 0.16,
+          top: size * 0.1,
+          right: size * 0.08,
           color: "#FFFFFF",
-          fontSize: size * 0.22,
+          fontSize: size * 0.2,
         }}
       />
     </Box>
