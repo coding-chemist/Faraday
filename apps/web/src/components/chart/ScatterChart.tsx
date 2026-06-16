@@ -25,9 +25,16 @@ interface Props {
   data: ChartData;
 }
 
+interface SeriesPoint {
+  x: number;
+  y: number;
+  id?: string | null;
+  series: string;
+}
+
 interface SeriesGroup {
   name: string;
-  points: { x: number; y: number; id?: string | null }[];
+  points: SeriesPoint[];
 }
 
 function groupBySeries(data: ChartData): SeriesGroup[] {
@@ -39,15 +46,17 @@ function groupBySeries(data: ChartData): SeriesGroup[] {
     if (!groups.has(key)) {
       groups.set(key, { name: key, points: [] });
     }
-    groups.get(key)!.points.push({ x, y: p.y, id: p.id });
+    // series stamped onto each point so the tooltip can read it (Recharts' own
+    // payload[0].name is the X axis dataKey, not the Scatter series name).
+    groups.get(key)!.points.push({ x, y: p.y, id: p.id, series: key });
   }
   return Array.from(groups.values());
 }
 
 function ScatterTooltip({ active, payload }: { active?: boolean; payload?: any[] }) {
   if (!active || !payload?.length) return null;
-  const p = payload[0]?.payload as { x: number; y: number; id?: string | null };
-  const series = payload[0]?.name as string | undefined;
+  const p = payload[0]?.payload as SeriesPoint | undefined;
+  if (!p) return null;
   const date = new Date(p.x).toISOString().slice(0, 10);
   const idShort = p.id ? p.id.replace(/^exp_/, "").slice(0, 6) : "—";
 
@@ -66,13 +75,19 @@ function ScatterTooltip({ active, payload }: { active?: boolean; payload?: any[]
       }}
     >
       <div style={{ fontWeight: 600, marginBottom: 4 }}>
-        <span style={{ color: faradayTokens.color.ink.secondary, fontFamily: faradayTokens.font.mono, fontSize: 11 }}>
+        <span
+          style={{
+            color: faradayTokens.color.ink.secondary,
+            fontFamily: faradayTokens.font.mono,
+            fontSize: 11,
+          }}
+        >
           ¶ {idShort}
         </span>
-        {series && (
+        {p.series && p.series !== "all" && (
           <>
             <span style={{ color: faradayTokens.color.ink.tertiary, margin: "0 6px" }}>·</span>
-            <span>{series}</span>
+            <span>{p.series}</span>
           </>
         )}
       </div>
@@ -99,8 +114,8 @@ export function ScatterChart({ data }: Props) {
   const series = groupBySeries(data);
 
   return (
-    <ResponsiveContainer width="100%" height={420}>
-      <RScatter margin={{ top: 16, right: 24, bottom: 40, left: 24 }}>
+    <ResponsiveContainer width="100%" height={440}>
+      <RScatter margin={{ top: 24, right: 32, bottom: 40, left: 24 }}>
         <CartesianGrid stroke={GRID_STROKE} strokeDasharray="3 3" opacity={0.45} />
         <XAxis
           type="number"
@@ -143,7 +158,7 @@ export function ScatterChart({ data }: Props) {
             strokeWidth={1.4}
             label={{
               value: data.threshold_y_label ?? `${data.threshold_y}`,
-              position: "right",
+              position: "insideTopRight",
               fill: faradayTokens.color.ink.secondary,
               fontSize: 11,
               fontFamily: faradayTokens.font.mono,
@@ -154,7 +169,7 @@ export function ScatterChart({ data }: Props) {
         <Legend
           verticalAlign="top"
           align="right"
-          height={28}
+          height={32}
           iconType="circle"
           iconSize={10}
           wrapperStyle={{ fontFamily: faradayTokens.font.body, fontSize: 13 }}
