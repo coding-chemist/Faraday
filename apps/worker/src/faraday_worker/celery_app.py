@@ -2,6 +2,7 @@
 from celery import Celery
 from celery.signals import worker_process_init
 
+from faraday_engine.repositories import init_db
 from faraday_shared.config import settings
 from faraday_shared.logging import setup_logging
 
@@ -30,3 +31,4 @@ celery_app.conf.update(
 @worker_process_init.connect
 def _on_worker_init(**_kwargs):
     setup_logging(level=settings.log_level, json=settings.log_json)
+    init_db()

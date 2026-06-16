@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from faraday_api.routes import health
+from faraday_engine.repositories import init_db
 from faraday_shared.config import settings
 from faraday_shared.logging import get_logger, http_request_id, setup_logging
 
@@ -16,6 +17,7 @@ from faraday_shared.logging import get_logger, http_request_id, setup_logging
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     setup_logging(level=settings.log_level, json=settings.log_json)
+    init_db()
     log = get_logger("faraday.api")
     log.info("api.startup", env=settings.env)
     yield
