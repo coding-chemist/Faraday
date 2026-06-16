@@ -8,10 +8,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from faraday_api.routes import ask
 from faraday_api.routes import health
 from faraday_engine.repositories import init_db
 from faraday_shared.config import settings
-from faraday_shared.logging import get_logger, http_request_id, setup_logging
+from faraday_shared.logging import get_logger
+from faraday_shared.logging import http_request_id
+from faraday_shared.logging import setup_logging
 
 
 @asynccontextmanager
@@ -72,6 +75,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health.router)
+    app.include_router(ask.router)
     return app
 
 

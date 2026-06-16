@@ -5,6 +5,7 @@ new if/elif block in list().
 """
 from datetime import datetime
 
+from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -90,6 +91,10 @@ class ExperimentRepository:
             return
         self._session.delete(orm)
         log.info("experiment.repo.delete", id=id)
+
+    def count_total(self) -> int:
+        """Unfiltered count — used by /ask to show 'of N total' next to matched count."""
+        return int(self._session.scalar(select(func.count(ExperimentORM.id))) or 0)
 
     # --- ORM ↔ domain conversion ---
 

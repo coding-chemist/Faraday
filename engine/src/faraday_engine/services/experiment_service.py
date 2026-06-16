@@ -35,6 +35,9 @@ class ExperimentService:
     def delete(self, id: str) -> None:
         self._repository.delete(id)
 
+    def count_total(self) -> int:
+        return self._repository.count_total()
+
     def complete(self, id: str, completed_at: datetime | None = None) -> Experiment:
         """Mark an experiment complete. Convenience wrapper over update."""
         return self.update(
