@@ -1,9 +1,9 @@
-// Right rail — sage watercolor backdrop with visible texture, edge bleed, paper grain.
-// Replaces the previous flat linear gradient.
+// Right rail — sage watercolor backdrop with botanical eucalyptus accents.
 
 import { Box } from "@mui/material";
 
 import { faradayTokens } from "../../design/theme";
+import { BotanicalCorner } from "../illustrations/BotanicalCorner";
 import { WatercolorWash } from "./WatercolorWash";
 
 interface Props {
@@ -24,6 +24,8 @@ export function RightRail({ children }: Props) {
       }}
     >
       <WatercolorWash variant="pronounced" seed={11} />
+      <BotanicalCorner position="top-right" variant="eucalyptus" size={160} opacity={0.45} />
+      <BotanicalCorner position="bottom-left" variant="fern" size={140} opacity={0.4} />
       <Box
         sx={{
           position: "relative",
