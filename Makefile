@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test lint format clean seed seed-clear embed seed-and-embed
+.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse
 
 install:
 	uv sync
@@ -37,6 +37,13 @@ seed-and-embed: seed-clear embed
 
 test:
 	uv run pytest
+
+test-llm:
+	uv run pytest -m llm -v
+
+parse:
+	@if [ -z "$(Q)" ]; then echo "Usage: make parse Q='your query'"; exit 1; fi
+	uv run python scripts/parse_query.py "$(Q)"
 
 lint:
 	uv run ruff check .

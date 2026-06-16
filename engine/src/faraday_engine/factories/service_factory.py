@@ -5,6 +5,7 @@ from faraday_engine.factories.provider_factory import ProviderFactory
 from faraday_engine.repositories.experiment_repository import ExperimentRepository
 from faraday_engine.services.embedding_service import EmbeddingService
 from faraday_engine.services.experiment_service import ExperimentService
+from faraday_engine.services.query_parser_service import QueryParserService
 
 
 class ServiceFactory:
@@ -21,3 +22,7 @@ class ServiceFactory:
             vector=ProviderFactory.create_vector(),
             repository=ExperimentRepository(session),
         )
+
+    @staticmethod
+    def create_query_parser_service() -> QueryParserService:
+        return QueryParserService(llm=ProviderFactory.create_llm())

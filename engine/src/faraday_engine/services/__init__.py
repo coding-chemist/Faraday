@@ -13,5 +13,6 @@ Verb vocabulary (locked):
 """
 from faraday_engine.services.embedding_service import EmbeddingService
 from faraday_engine.services.experiment_service import ExperimentService
+from faraday_engine.services.query_parser_service import QueryParserService
 
-__all__ = ["EmbeddingService", "ExperimentService"]
+__all__ = ["EmbeddingService", "ExperimentService", "QueryParserService"]

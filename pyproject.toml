@@ -44,3 +44,8 @@ known-first-party = ["faraday_shared", "faraday_engine", "faraday_api", "faraday
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "llm: integration tests that hit a real LLM provider (opt-in via -m llm)",
+]
+addopts = "-m 'not llm'"
+
