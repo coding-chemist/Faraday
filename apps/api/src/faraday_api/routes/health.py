@@ -47,6 +47,10 @@ class ProvidersResponse(BaseModel):
     vector: list[str]
     active_llm: str
     active_vector: str
+    llm_host: str | None
+    llm_model: str | None
+    llm_embed_model: str | None
+    llm_api_key_set: bool
 
 
 class LLMHealthResponse(BaseModel):
@@ -106,10 +110,16 @@ def llm_health() -> LLMHealthResponse:
 
 @router.get("/providers", response_model=ProvidersResponse)
 def providers() -> ProvidersResponse:
-    """Introspect what providers are registered. Useful for debugging Ollama Cloud swaps."""
+    """Introspect what providers are registered + the active LLM config.
+    api_key value is masked — only its presence is reported."""
+    cfg = settings.llm.config or {}
     return ProvidersResponse(
         llm=LLMRegistry.list(),
         vector=VectorRegistry.list(),
         active_llm=settings.llm.provider,
         active_vector=settings.vector.provider,
+        llm_host=cfg.get("host"),
+        llm_model=cfg.get("model"),
+        llm_embed_model=cfg.get("embed_model"),
+        llm_api_key_set=bool(cfg.get("api_key")),
     )

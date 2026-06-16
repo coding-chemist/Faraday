@@ -20,12 +20,12 @@ ENV PYTHONUNBUFFERED=1 \
     REDIS_URL=redis://127.0.0.1:6379/0 \
     CELERY_BROKER_URL=redis://127.0.0.1:6379/0 \
     CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/1 \
-    FARADAY_VECTOR_PROVIDER=faiss \
-    FARADAY_VECTOR_CONFIG__INDEX_PATH=/app/data/faiss_index \
-    FARADAY_LLM_PROVIDER=ollama \
-    FARADAY_LLM_CONFIG__HOST=https://ollama.com \
-    FARADAY_LLM_CONFIG__MODEL=llama3.1:8b \
-    FARADAY_LLM_CONFIG__EMBED_MODEL=nomic-embed-text
+    FARADAY_VECTOR__PROVIDER=faiss \
+    FARADAY_VECTOR__CONFIG__INDEX_PATH=/app/data/faiss_index \
+    FARADAY_LLM__PROVIDER=ollama \
+    FARADAY_LLM__CONFIG__HOST=https://ollama.com \
+    FARADAY_LLM__CONFIG__MODEL=llama3.1:8b \
+    FARADAY_LLM__CONFIG__EMBED_MODEL=nomic-embed-text
 
 # System packages
 RUN apt-get update && \
