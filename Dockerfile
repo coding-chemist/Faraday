@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED=1 \
     FARADAY_VECTOR_CONFIG__INDEX_PATH=/app/data/faiss_index \
     FARADAY_LLM_PROVIDER=ollama \
     FARADAY_LLM_CONFIG__HOST=https://ollama.com \
-    FARADAY_LLM_CONFIG__MODEL=gpt-oss-120b \
+    FARADAY_LLM_CONFIG__MODEL=llama3.1:8b \
     FARADAY_LLM_CONFIG__EMBED_MODEL=nomic-embed-text
 
 # System packages
