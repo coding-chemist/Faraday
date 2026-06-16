@@ -39,6 +39,12 @@ class Settings(BaseSettings):
                 "host": "http://localhost:11434",
                 "model": "qwen2.5:7b",
                 "embed_model": "nomic-embed-text",
+                # pydantic-settings only overrides EXISTING dict keys case-insensitively
+                # when loading from env. Keys not present in the default get added in
+                # their env-var case (uppercase), which then doesn't match the
+                # OllamaConfig.api_key field on spread. Listing api_key here ensures
+                # FARADAY_LLM__CONFIG__API_KEY merges into the correct lowercase key.
+                "api_key": None,
             },
         )
     )
