@@ -87,7 +87,7 @@ export function AskMode() {
 
         {!result && !loading && !error && (
           <Box sx={{ mt: 3 }}>
-            <SuggestedQueries onSelect={handleSubmit} disabled={loading} />
+            <SuggestedQueries onSelect={setQuery} disabled={loading} />
           </Box>
         )}
 
@@ -149,7 +149,7 @@ export function AskMode() {
                 Try again
               </Button>
             )}
-            <SuggestedQueries onSelect={handleSubmit} disabled={loading} compact />
+            <SuggestedQueries onSelect={setQuery} disabled={loading} compact />
           </Box>
         )}
 
@@ -200,7 +200,7 @@ export function AskMode() {
             >
               {result?.intent && `Interpreted as: ${result.intent}`}
             </Typography>
-            <SuggestedQueries onSelect={handleSubmit} disabled={loading} compact />
+            <SuggestedQueries onSelect={setQuery} disabled={loading} compact />
           </Box>
         )}
 
