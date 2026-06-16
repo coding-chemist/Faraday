@@ -22,14 +22,35 @@ interface Layout {
   vmax: number;
 }
 
+// Axes with no value-bearing cells just create empty columns/rows that push
+// the real data off-screen. Same rule as the bar chart: drop "(unknown)"
+// buckets when there's named data alongside them.
+function filterAxis(axis: string[], hasValueOn: (cat: string) => boolean): string[] {
+  const withData = axis.filter(hasValueOn);
+  const named = withData.filter((c) => c !== "(unknown)");
+  return named.length > 0 ? named : withData;
+}
+
 function buildLayout(cells: HeatmapCell[]): Layout {
-  const xCats = Array.from(new Set(cells.map((c) => c.x))).sort();
-  const yCats = Array.from(new Set(cells.map((c) => c.y))).sort();
   const cellsByKey = new Map(cells.map((c) => [`${c.x}|${c.y}`, c]));
+  const hasValue = (cat: string, axis: "x" | "y") =>
+    cells.some((c) => c[axis] === cat && c.value != null);
+
+  const rawX = Array.from(new Set(cells.map((c) => c.x))).sort();
+  const rawY = Array.from(new Set(cells.map((c) => c.y))).sort();
+  const xCats = filterAxis(rawX, (cat) => hasValue(cat, "x"));
+  const yCats = filterAxis(rawY, (cat) => hasValue(cat, "y"));
+
   const values = cells.map((c) => c.value).filter((v): v is number => v != null);
   const vmin = values.length ? Math.min(...values) : 0;
   const vmax = values.length ? Math.max(...values) : 1;
   return { xCats, yCats, cellsByKey, vmin, vmax };
+}
+
+// Truncate so column headers can't bleed into neighbors at 0° rotation.
+// Full label is preserved in the SVG <title> for hover.
+function shortLabel(s: string, max = 12): string {
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
 }
 
 export function HeatmapChart({ data }: Props) {
@@ -55,7 +76,7 @@ export function HeatmapChart({ data }: Props) {
   return (
     <div style={{ position: "relative", width: "100%", overflowX: "auto" }}>
       <svg width={width} height={height}>
-        {/* X axis tick labels */}
+        {/* X axis tick labels — horizontal, truncated, full name on hover */}
         {layout.xCats.map((cat, i) => (
           <text
             key={cat}
@@ -64,11 +85,12 @@ export function HeatmapChart({ data }: Props) {
             textAnchor="middle"
             style={axisTickStyle}
           >
-            {cat}
+            <title>{cat}</title>
+            {shortLabel(cat, 12)}
           </text>
         ))}
 
-        {/* Y axis tick labels */}
+        {/* Y axis tick labels — truncated to fit leftPad, full name on hover */}
         {layout.yCats.map((cat, j) => (
           <text
             key={cat}
@@ -77,7 +99,8 @@ export function HeatmapChart({ data }: Props) {
             textAnchor="end"
             style={axisTickStyle}
           >
-            {cat}
+            <title>{cat}</title>
+            {shortLabel(cat, 16)}
           </text>
         ))}
 
