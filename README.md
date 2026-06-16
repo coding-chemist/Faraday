@@ -21,11 +21,27 @@ Named after Michael Faraday — who wrote ~30,000 numbered paragraphs of lab jou
 
 ## Status
 
-**Spec locked · 2026-06-13 · Build deferred**
+**v0.1 Lab Memory Ask mode · shipped · live**
 
-This repo is the design phase. Architecture, persona, screen-level flow, and visual identity are committed. Implementation begins after the spec sits with the design — that's the discipline, not the delay.
+| | Link |
+|---|---|
+| Frontend | https://faraday-eta.vercel.app |
+| Backend | https://coding-chemist-faraday.hf.space |
+| Try a query | https://faraday-eta.vercel.app/memory/ask |
 
-Three illustration-grade screen mockups are in [`assets/`](./assets). Full functional spec is in [`docs/spec.md`](./docs/spec.md).
+Spec locked 2026-06-13. Build slice 1 (Lab Memory Ask mode) executed in a single session and deployed end-to-end on 2026-06-16. Three illustration-grade screen mockups are in [`assets/`](./assets); full functional spec is in [`docs/spec.md`](./docs/spec.md).
+
+**What works end-to-end:**
+
+- Natural-language query → structured `QuerySpec` via `gpt-oss:20b` on Ollama Cloud (custom markdown-fence-strip retry loop on top of `instructor` + Pydantic)
+- Pandas filter + aggregate keyed by `ChartType` enum (factory + decorator registry, no `if/elif` chains)
+- Six chart types rendered via Recharts: scatter, timeseries, bar, list, histogram, heatmap
+- 210 realistic seeded experiments across five reaction types (Suzuki coupling / Buchwald-Hartwig / amide coupling / reductive amination / carbonyl reduction), frequency-weighted per Roughley & Jordan medchem literature analysis
+- Glassmorphism matched-experiments table with top-5 pagination, search, status filters
+- Heatmap with frozen X/Y axes (Excel-style 2D pane)
+- Marketing landing with a live Ask-preview hero card (real components, not a mockup)
+
+**Stack:** FastAPI · Celery · Redis · SQLite · FAISS · Vite · React · MUI · Tailwind · Recharts · Ollama Cloud (`gpt-oss:20b`) · Docker on HF Spaces · Vercel
 
 ---
 
@@ -75,22 +91,22 @@ Same stack as [Curie](https://github.com/coding-chemist/Curie) — RAG primitive
 
 ---
 
-## v0.1 scope (locked — no more changes)
+## v0.1 scope
 
-| Area | Ships in v0.1 |
+| Area | Status |
 |---|---|
-| Entry | Template library (5 industry experiments) + Blank canvas |
-| Reagent setup | All 5 methods: type-ahead, CAS lookup, barcode image, inventory pick, custom compound |
-| Live recording | Standard checkpoints (auto-generated from template steps) + custom comments |
-| Instrument ingest | NMR (`.jdx`, `.csv`) + HPLC (`.csv`) — others get "working on" placeholder |
-| Lab Memory | All 3 modes: Watch, Ask, Compare |
-| Anomaly detection | Stoichiometry + SOP deviation + history comparison |
-| Calculations | Yield, equivalents, theoretical yield, thermodynamics, kinetics |
-| Output | Editable structured report + PDF export (no DOCX in v0.1) |
-| Audit trail | ALCOA timestamps + immutable history + manual "Witnessed by [name]" field |
+| Lab Memory · Ask mode | **Shipped** — NL → QuerySpec → pandas aggregate → 6 chart types · live |
+| Editor (block-based) | Coming v0.2 — spec locked, mockup in [`assets/editor.png`](./assets/editor.png) |
+| Reagent setup (type-ahead, CAS, barcode, inventory, custom) | Coming v0.2 |
+| Live recording + checkpoints | Coming v0.2 |
+| Instrument ingest — NMR (`.jdx`, `.csv`) + HPLC (`.csv`) | Coming v0.2 |
+| Lab Memory · Watch mode (proactive sidebar) | Coming v0.2 |
+| Lab Memory · Compare mode (structured diff) | Coming v0.2 |
+| Anomaly detection (stoichiometry · SOP · history) | Coming v0.2 |
+| Calculations (yield · equivalents · thermodynamics · kinetics) | Coming v0.2 |
+| Output — editable report + PDF export | Coming v0.2 |
+| Audit trail — ALCOA timestamps + immutable history + witness | Coming v0.2 |
 | Auth | None — single-user demo |
-
-**Build estimate**: 6-8 weeks solo, post-portfolio-ship.
 
 ---
 
