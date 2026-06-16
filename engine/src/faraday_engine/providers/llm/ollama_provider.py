@@ -10,6 +10,7 @@
 // local mode uses OpenAI SDK + instructor for structured-output retries.
 """
 import json
+import re
 from typing import Any
 
 import instructor
@@ -24,6 +25,15 @@ from faraday_engine.providers.llm.base import ProviderConfig
 from faraday_shared.logging import get_logger
 
 log = get_logger(__name__)
+
+# Some cloud models (notably gpt-oss:*) wrap JSON in markdown code fences even
+# when format="json" is set on the request. Strip them before validating.
+_FENCE_RE = re.compile(r"^\s*```(?:json)?\s*\n?(.*?)\n?\s*```\s*$", re.DOTALL | re.IGNORECASE)
+
+
+def _strip_json_fence(content: str) -> str:
+    match = _FENCE_RE.match(content)
+    return match.group(1).strip() if match else content.strip()
 
 
 class OllamaConfig(ProviderConfig):
@@ -91,7 +101,7 @@ class OllamaProvider(LLMProvider):
                 messages=[{"role": "user", "content": current_prompt}],
                 format="json",
             )
-            content = response["message"]["content"]
+            content = _strip_json_fence(response["message"]["content"])
             try:
                 return response_model.model_validate_json(content)
             except ValidationError as exc:

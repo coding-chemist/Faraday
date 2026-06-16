@@ -53,13 +53,19 @@ class ProvidersResponse(BaseModel):
     llm_api_key_set: bool
 
 
+class _Pong(BaseModel):
+    """Minimal schema for the chat smoke-test: forces the model through the
+    same JSON-validated path /memory/ask uses, without touching the DB."""
+    pong: bool
+
+
 class LLMHealthResponse(BaseModel):
     status: str
     provider: str
     host: str | None
     cloud: bool
-    embedding_dim: int | None
     model: str | None
+    chat_ok: bool
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -78,18 +84,17 @@ def health() -> HealthResponse:
 
 @router.get("/health/llm", response_model=LLMHealthResponse)
 def llm_health() -> LLMHealthResponse:
-    """End-to-end LLM smoke check — proves the API key + host + model are wired.
+    """End-to-end LLM smoke check — proves the API key + host + chat model wire up.
 
-    Calls embed('ping') (faster + cheaper than a full chat completion) and
-    reports the returned embedding dimension. 503 if the provider doesn't
-    respond, with the underlying error in the detail.
-
-    Hit this after every deploy to confirm secrets are correct. Don't include
-    in liveness probes — it adds 200-2000ms latency depending on the model.
+    Uses the chat path (the one /memory/ask actually depends on), NOT embed.
+    Ollama Cloud doesn't serve /api/embeddings, and the chat round-trip is
+    what we actually care about for the demo. 503 with the underlying error
+    if the provider doesn't respond. Latency ~500-2000ms — fine for manual
+    deploy checks, do not include in liveness probes.
     """
     try:
         llm = ProviderFactory.create_llm()
-        vec = llm.embed("ping")
+        result = llm.parse('Respond with JSON {"pong": true}. Nothing else.', _Pong)
         host = settings.llm.config.get("host")
         api_key = settings.llm.config.get("api_key")
         return LLMHealthResponse(
@@ -97,8 +102,8 @@ def llm_health() -> LLMHealthResponse:
             provider=llm.name,
             host=str(host) if host else None,
             cloud=bool(api_key),
-            embedding_dim=len(vec),
-            model=settings.llm.config.get("embed_model") or settings.llm.config.get("model"),
+            model=settings.llm.config.get("model"),
+            chat_ok=bool(getattr(result, "pong", False)),
         )
     except Exception as exc:
         log.exception("health.llm.failed", error=str(exc))
