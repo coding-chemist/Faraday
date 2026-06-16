@@ -1,59 +1,54 @@
-// Left sidebar — Lab Memory parent gets a featured green tile around its icon
-// (the brand-accent treatment shown in the mockup). When /icons/lab-memory.png
-// is present, it replaces the SVG fallback for that one icon.
+// Left sidebar — Material Design outlined icons (Google's library) chosen
+// for closest match per item. Lab Memory parent uses the featured green-tile
+// treatment around its brain icon per the mockup.
 
+import AssignmentIcon from "@mui/icons-material/AssignmentOutlined";
+import BalanceIcon from "@mui/icons-material/BalanceOutlined";
+import BarChartIcon from "@mui/icons-material/BarChartOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import GridViewIcon from "@mui/icons-material/GridViewOutlined";
+import HubIcon from "@mui/icons-material/HubOutlined";
+import MenuBookIcon from "@mui/icons-material/MenuBookOutlined";
+import PsychologyIcon from "@mui/icons-material/PsychologyOutlined";
+import ScienceIcon from "@mui/icons-material/ScienceOutlined";
+import SearchIcon from "@mui/icons-material/SearchOutlined";
+import SettingsIcon from "@mui/icons-material/SettingsOutlined";
+import VisibilityIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, Tooltip } from "@mui/material";
-import type { ComponentType } from "react";
+import type { SvgIconComponent } from "@mui/icons-material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { faradayTokens } from "../../design/theme";
 import { Logo } from "./Logo";
-import {
-  AskIcon,
-  CompareIcon,
-  DataIcon,
-  LabMemoryIcon,
-  NotebookIcon,
-  ProtocolsIcon,
-  ReagentsIcon,
-  SettingsIcon,
-  StructureIcon,
-  TemplatesIcon,
-  WatchIcon,
-} from "./icons";
 
 interface NavItem {
   label: string;
   href: string;
-  icon: ComponentType;
+  icon: SvgIconComponent;
   /** When true, the item is rendered greyed-out with a 'coming soon' tooltip. */
   comingSoon?: boolean;
   /** When true, the icon renders inside a featured forest-green tile (brand accent). */
   featured?: boolean;
-  /** Optional PNG asset under public/icons/ used in place of the SVG icon. */
-  iconImage?: string;
   children?: NavItem[];
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { label: "Notebook", href: "/notebook", icon: NotebookIcon, comingSoon: true },
-  { label: "Reagents", href: "/reagents", icon: ReagentsIcon, comingSoon: true },
-  { label: "Data", href: "/data", icon: DataIcon, comingSoon: true },
-  { label: "Structure", href: "/structure", icon: StructureIcon, comingSoon: true },
-  { label: "Protocols", href: "/protocols", icon: ProtocolsIcon, comingSoon: true },
-  { label: "Templates", href: "/templates", icon: TemplatesIcon, comingSoon: true },
+  { label: "Notebook", href: "/notebook", icon: MenuBookIcon, comingSoon: true },
+  { label: "Reagents", href: "/reagents", icon: ScienceIcon, comingSoon: true },
+  { label: "Data", href: "/data", icon: BarChartIcon, comingSoon: true },
+  { label: "Structure", href: "/structure", icon: HubIcon, comingSoon: true },
+  { label: "Protocols", href: "/protocols", icon: AssignmentIcon, comingSoon: true },
+  { label: "Templates", href: "/templates", icon: GridViewIcon, comingSoon: true },
   {
     label: "Lab Memory",
     href: "/memory",
-    icon: LabMemoryIcon,
+    icon: PsychologyIcon,
     featured: true,
-    iconImage: "/icons/lab-memory.png",
     children: [
-      { label: "Watch", href: "/memory/watch", icon: WatchIcon, comingSoon: true },
-      { label: "Ask", href: "/memory/ask", icon: AskIcon },
-      { label: "Compare", href: "/memory/compare", icon: CompareIcon, comingSoon: true },
+      { label: "Watch", href: "/memory/watch", icon: VisibilityIcon, comingSoon: true },
+      { label: "Ask", href: "/memory/ask", icon: SearchIcon },
+      { label: "Compare", href: "/memory/compare", icon: BalanceIcon, comingSoon: true },
     ],
   },
 ];
@@ -75,14 +70,6 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
   const isExpandable = !!item.children?.length;
   const isComing = !!item.comingSoon;
   const isFeatured = !!item.featured;
-
-  const iconColor = isFeatured
-    ? "#FFFFFF"
-    : active
-      ? faradayTokens.color.forest[900]
-      : isComing
-        ? faradayTokens.color.ink.tertiary
-        : faradayTokens.color.ink.secondary;
 
   const content = (
     <Box
@@ -118,39 +105,25 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: isFeatured ? 30 : 20,
-          height: isFeatured ? 30 : 20,
+          width: isFeatured ? 32 : 22,
+          height: isFeatured ? 32 : 22,
           borderRadius: isFeatured ? 1.5 : 0,
           background: isFeatured ? faradayTokens.color.forest[700] : "transparent",
-          color: iconColor,
           flexShrink: 0,
         }}
       >
-        {item.iconImage ? (
-          <img
-            src={item.iconImage}
-            alt=""
-            width={isFeatured ? 20 : 16}
-            height={isFeatured ? 20 : 16}
-            style={{ display: "block" }}
-            onError={(e) => {
-              // PNG missing — fall back to inline SVG by hiding the img
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-              const sibling = (e.currentTarget as HTMLImageElement)
-                .nextElementSibling as HTMLElement | null;
-              if (sibling) sibling.style.display = "block";
-            }}
-          />
-        ) : null}
-        <Box
+        <Icon
           sx={{
-            display: item.iconImage ? "none" : "block",
-            color: "inherit",
-            lineHeight: 0,
+            fontSize: isFeatured ? 20 : 20,
+            color: isFeatured
+              ? "#FFFFFF"
+              : active
+                ? faradayTokens.color.forest[900]
+                : isComing
+                  ? faradayTokens.color.ink.tertiary
+                  : faradayTokens.color.ink.secondary,
           }}
-        >
-          <Icon />
-        </Box>
+        />
       </Box>
       <Box sx={{ flex: 1 }}>{item.label}</Box>
       {isExpandable && (expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />)}
