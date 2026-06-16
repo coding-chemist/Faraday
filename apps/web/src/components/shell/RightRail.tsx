@@ -1,13 +1,47 @@
-// Right rail — sage watercolor backdrop with botanical eucalyptus accents.
+// Right rail — pronounced sage watercolor backdrop. Optional botanical PNG
+// overlays in two corners (top-right + bottom-left); each is opt-in via the
+// presence of the file under /illustrations/. When missing, the corner is
+// simply empty — no fake hand-drawn fallback that looks worse than nothing.
 
 import { Box } from "@mui/material";
 
 import { faradayTokens } from "../../design/theme";
-import { BotanicalCorner } from "../illustrations/BotanicalCorner";
 import { WatercolorWash } from "./WatercolorWash";
 
 interface Props {
   children: React.ReactNode;
+}
+
+function CornerImage({
+  src,
+  position,
+}: {
+  src: string;
+  position: "top-right" | "bottom-left";
+}) {
+  const positionStyle =
+    position === "top-right"
+      ? { top: 0, right: 0 }
+      : { bottom: 0, left: 0, transform: "scaleY(-1)" };
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      style={{
+        position: "absolute",
+        width: 160,
+        height: "auto",
+        opacity: 0.5,
+        pointerEvents: "none",
+        ...positionStyle,
+      }}
+      onError={(e) => {
+        // PNG missing — hide silently. Nothing is better than fake hand-drawn.
+        (e.currentTarget as HTMLImageElement).style.display = "none";
+      }}
+    />
+  );
 }
 
 export function RightRail({ children }: Props) {
@@ -24,8 +58,8 @@ export function RightRail({ children }: Props) {
       }}
     >
       <WatercolorWash variant="pronounced" seed={11} />
-      <BotanicalCorner position="top-right" variant="eucalyptus" size={160} opacity={0.45} />
-      <BotanicalCorner position="bottom-left" variant="fern" size={140} opacity={0.4} />
+      <CornerImage src="/illustrations/eucalyptus.png" position="top-right" />
+      <CornerImage src="/illustrations/fern.png" position="bottom-left" />
       <Box
         sx={{
           position: "relative",

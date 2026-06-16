@@ -1,1 +1,0 @@
-export { BotanicalCorner } from "./BotanicalCorner";
