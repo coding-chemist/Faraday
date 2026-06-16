@@ -2,11 +2,16 @@
 import time
 
 from fastapi import APIRouter
+from fastapi import HTTPException
 from pydantic import BaseModel
 
+from faraday_engine.factories.provider_factory import ProviderFactory
 from faraday_engine.providers.llm import LLMRegistry
 from faraday_engine.providers.vector import VectorRegistry
 from faraday_shared.config import settings
+from faraday_shared.logging import get_logger
+
+log = get_logger(__name__)
 
 router = APIRouter(tags=["health"])
 
@@ -26,14 +31,59 @@ class ProvidersResponse(BaseModel):
     active_vector: str
 
 
+class LLMHealthResponse(BaseModel):
+    status: str
+    provider: str
+    host: str | None
+    cloud: bool
+    embedding_dim: int | None
+    model: str | None
+
+
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    """Liveness check. Frontend warms HF Spaces by calling this on mount."""
+    """Liveness check. Frontend warms HF Spaces by calling this on mount.
+
+    Stays fast — does NOT touch the LLM. Use /health/llm for the end-to-end
+    secret + connectivity smoke test.
+    """
     return HealthResponse(
         status="ok",
         env=settings.env,
         uptime_s=round(time.time() - _STARTED_AT, 2),
     )
+
+
+@router.get("/health/llm", response_model=LLMHealthResponse)
+def llm_health() -> LLMHealthResponse:
+    """End-to-end LLM smoke check — proves the API key + host + model are wired.
+
+    Calls embed('ping') (faster + cheaper than a full chat completion) and
+    reports the returned embedding dimension. 503 if the provider doesn't
+    respond, with the underlying error in the detail.
+
+    Hit this after every deploy to confirm secrets are correct. Don't include
+    in liveness probes — it adds 200-2000ms latency depending on the model.
+    """
+    try:
+        llm = ProviderFactory.create_llm()
+        vec = llm.embed("ping")
+        host = settings.llm.config.get("host")
+        api_key = settings.llm.config.get("api_key")
+        return LLMHealthResponse(
+            status="ok",
+            provider=llm.name,
+            host=str(host) if host else None,
+            cloud=bool(api_key),
+            embedding_dim=len(vec),
+            model=settings.llm.config.get("embed_model") or settings.llm.config.get("model"),
+        )
+    except Exception as exc:
+        log.exception("health.llm.failed", error=str(exc))
+        raise HTTPException(
+            status_code=503,
+            detail=f"LLM unreachable: {type(exc).__name__}: {exc}",
+        ) from exc
 
 
 @router.get("/providers", response_model=ProvidersResponse)

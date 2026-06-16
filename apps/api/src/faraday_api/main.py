@@ -23,8 +23,35 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     init_db()
     log = get_logger("faraday.api")
     log.info("api.startup", env=settings.env)
+    _warn_on_missing_secrets(log)
     yield
     log.info("api.shutdown")
+
+
+def _warn_on_missing_secrets(log) -> None:
+    """Flag config that will almost certainly fail at first request."""
+    if settings.env != "prod":
+        return
+    if settings.llm.provider == "ollama":
+        host = str(settings.llm.config.get("host", ""))
+        api_key = settings.llm.config.get("api_key")
+        if "ollama.com" in host and not api_key:
+            log.warning(
+                "startup.secret.missing",
+                detail=(
+                    "FARADAY_LLM_CONFIG__API_KEY is empty but FARADAY_LLM_CONFIG__HOST "
+                    "targets Ollama Cloud. Embeddings + completions will 401 — set the "
+                    "secret in HF Space → Settings → Variables and secrets."
+                ),
+            )
+    if not settings.cors_origin_list:
+        log.warning(
+            "startup.secret.missing",
+            detail=(
+                "FARADAY_CORS_ORIGINS is empty — the Vercel frontend will be blocked by "
+                "CORS on every request. Set it to your Vercel URL(s)."
+            ),
+        )
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):

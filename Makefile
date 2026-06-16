@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run web-build web-preview
+.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run web-build web-preview smoke-llm
 
 install:
 	uv sync
@@ -80,3 +80,13 @@ web-build:
 
 web-preview: web-build
 	cd apps/web && npm run preview
+
+# --- LLM secret smoke test ---
+
+smoke-llm:
+	@if [ -z "$$FARADAY_API_URL" ]; then \
+	  echo "Usage: make smoke-llm FARADAY_API_URL=https://<your-space>.hf.space"; \
+	  exit 1; \
+	fi
+	@echo "Probing $$FARADAY_API_URL/health/llm ..."
+	@curl -sS "$$FARADAY_API_URL/health/llm" | python -m json.tool
