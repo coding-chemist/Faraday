@@ -23,13 +23,15 @@ export function SuggestedQueries({ onSelect, disabled = false, compact = false }
       {!compact && (
         <Typography
           sx={{
-            fontSize: 13,
+            fontFamily: faradayTokens.font.mono,
+            fontSize: 11,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
             color: faradayTokens.color.ink.secondary,
-            fontStyle: "italic",
             mb: 1.5,
           }}
         >
-          Try one of these:
+          Try one of these
         </Typography>
       )}
       <Box
@@ -48,17 +50,20 @@ export function SuggestedQueries({ onSelect, disabled = false, compact = false }
             disabled={disabled}
             clickable
             sx={{
-              background: faradayTokens.color.surface.elevated,
+              background: "rgba(255, 255, 255, 0.7)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
               border: `1px solid ${faradayTokens.color.forest[100]}`,
-              fontSize: 13,
-              fontFamily: faradayTokens.font.body,
+              borderRadius: 1.5,
+              fontSize: 12,
+              fontFamily: faradayTokens.font.mono,
               color: faradayTokens.color.ink.primary,
               height: "auto",
               py: 1,
               px: 0.5,
               "& .MuiChip-label": { px: 1.5, whiteSpace: "normal", lineHeight: 1.4 },
               "&:hover": {
-                background: faradayTokens.color.surface.sunken,
+                background: "rgba(255, 255, 255, 0.9)",
                 borderColor: faradayTokens.color.forest[300],
               },
             }}

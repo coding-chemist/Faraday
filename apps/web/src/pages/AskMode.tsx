@@ -73,9 +73,9 @@ export function AskMode() {
             <Box sx={{ mt: 2 }}>
               <Typography
                 sx={{
-                  fontSize: 13,
+                  fontFamily: faradayTokens.font.mono,
+                  fontSize: 11,
                   color: faradayTokens.color.ink.secondary,
-                  fontStyle: "italic",
                   textAlign: "center",
                 }}
               >
@@ -125,12 +125,12 @@ export function AskMode() {
             </Typography>
             <Typography
               sx={{
-                fontSize: 20,
-                fontFamily: faradayTokens.font.display,
-                fontWeight: 500,
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 16,
+                fontWeight: 600,
                 color: faradayTokens.color.ink.primary,
                 mb: 2,
-                lineHeight: 1.3,
+                lineHeight: 1.4,
               }}
             >
               Try rewording, or pick a starter below.
@@ -142,6 +142,9 @@ export function AskMode() {
                 startIcon={<RefreshIcon />}
                 sx={{
                   mb: 2,
+                  fontFamily: faradayTokens.font.mono,
+                  fontSize: 12,
+                  letterSpacing: "0.04em",
                   color: faradayTokens.color.forest[700],
                   "&:hover": { background: faradayTokens.color.forest[50] },
                 }}
@@ -180,21 +183,21 @@ export function AskMode() {
             </Typography>
             <Typography
               sx={{
-                fontSize: 20,
-                fontFamily: faradayTokens.font.display,
-                fontWeight: 500,
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 16,
+                fontWeight: 600,
                 color: faradayTokens.color.ink.primary,
                 mb: 2,
-                lineHeight: 1.3,
+                lineHeight: 1.4,
               }}
             >
               The lab doesn't remember anything like that.
             </Typography>
             <Typography
               sx={{
-                fontSize: 14,
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 12,
                 color: faradayTokens.color.ink.secondary,
-                fontStyle: "italic",
                 mb: 3,
               }}
             >

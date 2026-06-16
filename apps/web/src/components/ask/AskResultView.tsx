@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 
 import { faradayTokens } from "../../design/theme";
 import type { AnalysisResult } from "../../types/analysis";
@@ -13,6 +13,7 @@ interface Props {
 
 export function AskResultView({ result }: Props) {
   const isListChart = result.chart_data.chart_type === "list";
+  const matchedCount = result.matched_experiments.length;
 
   return (
     <Box component="section" aria-label="query result" sx={{ mt: 4 }}>
@@ -21,9 +22,10 @@ export function AskResultView({ result }: Props) {
           <Typography
             component="h2"
             sx={{
-              fontFamily: faradayTokens.font.display,
-              fontSize: { xs: 18, md: 20 },
+              fontFamily: faradayTokens.font.mono,
+              fontSize: { xs: 15, md: 16 },
               fontWeight: 600,
+              letterSpacing: "-0.005em",
               color: faradayTokens.color.ink.primary,
               mb: 0.5,
             }}
@@ -37,20 +39,43 @@ export function AskResultView({ result }: Props) {
 
       <SummaryCards cards={result.summary_cards} />
 
-      {result.matched_experiments.length > 0 && (
+      {matchedCount > 0 && (
         <Box sx={{ mt: 5 }}>
-          <Typography
-            component="h3"
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="baseline"
             sx={{
-              fontSize: 16,
-              fontWeight: 600,
-              fontFamily: faradayTokens.font.display,
               mb: 2,
-              color: faradayTokens.color.ink.primary,
+              pb: 1,
+              borderBottom: `1px solid ${faradayTokens.color.forest[100]}`,
             }}
           >
-            {isListChart ? "Matched experiments" : "All matches"}
-          </Typography>
+            <Typography
+              component="h3"
+              sx={{
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: faradayTokens.color.forest[700],
+              }}
+            >
+              From the notebook
+            </Typography>
+            <Typography
+              component="span"
+              sx={{
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 11,
+                color: faradayTokens.color.ink.tertiary,
+                fontFeatureSettings: '"tnum" 1',
+              }}
+            >
+              {matchedCount} {matchedCount === 1 ? "entry" : "entries"}
+            </Typography>
+          </Stack>
           <ListView experiments={result.matched_experiments} />
         </Box>
       )}

@@ -32,10 +32,41 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: "failed", label: "Failed" },
 ];
 
-const MONO_CELL_SX = {
-  fontFamily: faradayTokens.font.mono,
-  fontFeatureSettings: '"tnum" 1',
-  fontSize: 12,
+// Single mono font stack for every text node in this view — keeps numerals,
+// status pills, and ellipsized cells visually consistent at any width.
+const MONO_FONT = faradayTokens.font.mono;
+const TNUM = '"tnum" 1';
+
+const HEADER_SX = {
+  fontFamily: MONO_FONT,
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: faradayTokens.color.ink.secondary,
+  borderBottom: `1px solid ${faradayTokens.color.forest[100]}`,
+  py: 1.25,
+};
+
+const CELL_SX = {
+  fontFamily: MONO_FONT,
+  fontSize: 12.5,
+  py: 1.25,
+  borderBottom: `1px solid ${faradayTokens.color.forest[50]}`,
+};
+
+const TRUNCATE = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap" as const,
+};
+
+const TITLE_CLAMP = {
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical" as const,
+  overflow: "hidden",
+  lineHeight: 1.35,
 };
 
 export function ListView({ experiments }: Props) {
@@ -64,7 +95,7 @@ export function ListView({ experiments }: Props) {
 
   if (experiments.length === 0) {
     return (
-      <Box sx={{ color: faradayTokens.color.ink.secondary, fontFamily: faradayTokens.font.mono, fontSize: 13 }}>
+      <Box sx={{ color: faradayTokens.color.ink.secondary, fontFamily: MONO_FONT, fontSize: 13 }}>
         No experiments matched.
       </Box>
     );
@@ -93,15 +124,20 @@ export function ListView({ experiments }: Props) {
                 <SearchIcon sx={{ color: faradayTokens.color.ink.tertiary, fontSize: 18 }} />
               </InputAdornment>
             ),
+            sx: {
+              fontFamily: MONO_FONT,
+              fontSize: 13,
+            },
           }}
           sx={{
             maxWidth: { sm: 360 },
             "& .MuiOutlinedInput-root": {
-              background: faradayTokens.color.surface.elevated,
-              borderRadius: 2,
-              fontSize: 14,
+              background: "rgba(255, 255, 255, 0.7)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              borderRadius: 1.5,
             },
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E5E2DA" },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(201, 228, 210, 0.7)" },
           }}
           inputProps={{ "aria-label": "search matched experiments" }}
         />
@@ -117,9 +153,10 @@ export function ListView({ experiments }: Props) {
               }}
               variant={statusFilter === f.value ? "filled" : "outlined"}
               sx={{
-                fontSize: 12,
-                fontFamily: faradayTokens.font.body,
-                borderColor: faradayTokens.color.forest[100],
+                fontSize: 11.5,
+                fontFamily: MONO_FONT,
+                borderRadius: 1.5,
+                borderColor: "rgba(201, 228, 210, 0.7)",
                 ...(statusFilter === f.value
                   ? {
                       background: faradayTokens.color.forest[700],
@@ -127,9 +164,11 @@ export function ListView({ experiments }: Props) {
                       "&:hover": { background: faradayTokens.color.forest[900] },
                     }
                   : {
-                      background: faradayTokens.color.surface.elevated,
+                      background: "rgba(255, 255, 255, 0.7)",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
                       color: faradayTokens.color.ink.primary,
-                      "&:hover": { background: faradayTokens.color.surface.sunken },
+                      "&:hover": { background: "rgba(255, 255, 255, 0.9)" },
                     }),
               }}
             />
@@ -141,55 +180,93 @@ export function ListView({ experiments }: Props) {
         <Box
           sx={{
             color: faradayTokens.color.ink.secondary,
-            fontFamily: faradayTokens.font.mono,
+            fontFamily: MONO_FONT,
             fontSize: 13,
             p: 3,
             textAlign: "center",
-            background: faradayTokens.color.surface.muted,
-            borderRadius: 2,
+            background: "rgba(255, 255, 255, 0.55)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderRadius: 1.5,
+            border: "1px solid rgba(255, 255, 255, 0.5)",
           }}
         >
           No matches for {search ? `"${search}"` : "this filter"}.
         </Box>
       ) : (
-        <TableContainer sx={{ background: faradayTokens.color.surface.elevated, borderRadius: 2 }}>
-          <Table size="small">
+        <TableContainer
+          sx={{
+            background: "rgba(255, 255, 255, 0.55)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            borderRadius: 1.5,
+            border: "1px solid rgba(255, 255, 255, 0.55)",
+            boxShadow: "0 4px 24px rgba(45, 106, 79, 0.06)",
+            overflow: "hidden",
+          }}
+        >
+          <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
+            <colgroup>
+              <col style={{ width: "28%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "22%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "9%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "7%" }} />
+            </colgroup>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Catalyst</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Solvent</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">Yield</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                <TableCell sx={HEADER_SX}>Title</TableCell>
+                <TableCell sx={HEADER_SX}>Type</TableCell>
+                <TableCell sx={HEADER_SX}>Catalyst</TableCell>
+                <TableCell sx={HEADER_SX}>Solvent</TableCell>
+                <TableCell sx={HEADER_SX} align="right">Yield</TableCell>
+                <TableCell sx={HEADER_SX}>Date</TableCell>
+                <TableCell sx={HEADER_SX}>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {pageRows.map((exp) => (
-                <TableRow key={exp.id} hover sx={{ "&:last-child td": { borderBottom: 0 } }}>
-                  <TableCell>{exp.title}</TableCell>
-                  <TableCell sx={MONO_CELL_SX}>{exp.type.replace(/_/g, " ")}</TableCell>
-                  <TableCell>{exp.catalyst ?? "—"}</TableCell>
-                  <TableCell>{exp.solvent ?? "—"}</TableCell>
-                  <TableCell align="right" sx={MONO_CELL_SX}>
+                <TableRow
+                  key={exp.id}
+                  hover
+                  sx={{
+                    "&:last-child td": { borderBottom: 0 },
+                    "&:hover": { background: "rgba(230, 242, 234, 0.4)" },
+                  }}
+                >
+                  <TableCell sx={{ ...CELL_SX, ...TITLE_CLAMP }} title={exp.title}>
+                    {exp.title}
+                  </TableCell>
+                  <TableCell sx={{ ...CELL_SX, ...TRUNCATE, fontSize: 11.5, color: faradayTokens.color.ink.secondary }} title={exp.type}>
+                    {exp.type.replace(/_/g, " ")}
+                  </TableCell>
+                  <TableCell sx={{ ...CELL_SX, ...TRUNCATE }} title={exp.catalyst ?? ""}>
+                    {exp.catalyst ?? "—"}
+                  </TableCell>
+                  <TableCell sx={{ ...CELL_SX, ...TRUNCATE }} title={exp.solvent ?? ""}>
+                    {exp.solvent ?? "—"}
+                  </TableCell>
+                  <TableCell align="right" sx={{ ...CELL_SX, fontFeatureSettings: TNUM, fontWeight: 600 }}>
                     {exp.yield_pct != null ? `${exp.yield_pct.toFixed(1)}%` : "—"}
                   </TableCell>
-                  <TableCell sx={MONO_CELL_SX}>
+                  <TableCell sx={{ ...CELL_SX, fontFeatureSettings: TNUM, color: faradayTokens.color.ink.secondary }}>
                     {exp.started_at ? exp.started_at.slice(0, 10) : "—"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={CELL_SX}>
                     <span
                       style={{
-                        fontFamily: faradayTokens.font.mono,
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 12,
+                        fontFamily: MONO_FONT,
+                        fontSize: 10.5,
+                        padding: "2px 6px",
+                        borderRadius: 4,
                         background: statusColor(exp.status, 0.15),
                         color: statusColor(exp.status, 1),
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {exp.status.replace(/_/g, " ")}
+                      {exp.status === "in_progress" ? "running" : exp.status}
                     </span>
                   </TableCell>
                 </TableRow>
@@ -214,15 +291,11 @@ export function ListView({ experiments }: Props) {
           labelRowsPerPage="Per page:"
           sx={{
             mt: 1,
-            fontFamily: faradayTokens.font.body,
+            fontFamily: MONO_FONT,
             color: faradayTokens.color.ink.secondary,
-            "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel": {
-              fontFamily: faradayTokens.font.body,
-              fontSize: 13,
-            },
-            "& .MuiTablePagination-select": {
-              fontFamily: faradayTokens.font.mono,
-              fontSize: 13,
+            "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel, & .MuiTablePagination-select": {
+              fontFamily: MONO_FONT,
+              fontSize: 12,
             },
           }}
         />
@@ -231,7 +304,7 @@ export function ListView({ experiments }: Props) {
       {search || statusFilter !== "all" ? (
         <Typography
           sx={{
-            fontFamily: faradayTokens.font.mono,
+            fontFamily: MONO_FONT,
             fontSize: 11,
             color: faradayTokens.color.ink.tertiary,
             mt: 0.5,

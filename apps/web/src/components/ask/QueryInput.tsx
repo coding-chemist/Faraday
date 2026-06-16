@@ -58,9 +58,15 @@ export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Pr
           "& .MuiOutlinedInput-root": {
             background: faradayTokens.color.surface.elevated,
             borderRadius: 999,
-            fontSize: 16,
+            fontFamily: faradayTokens.font.mono,
+            fontSize: 14,
             paddingLeft: 2,
             paddingRight: 2,
+          },
+          "& .MuiOutlinedInput-input::placeholder": {
+            fontFamily: faradayTokens.font.mono,
+            fontSize: 13,
+            opacity: 0.6,
           },
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: "#E5E2DA",
@@ -83,8 +89,10 @@ export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Pr
         sx={{
           borderRadius: 999,
           px: 4,
-          fontSize: 15,
-          fontWeight: 500,
+          fontFamily: faradayTokens.font.mono,
+          fontSize: 13,
+          fontWeight: 600,
+          letterSpacing: "0.04em",
           background: faradayTokens.color.forest[700],
           color: "#FFFFFF",
           boxShadow: "none",
