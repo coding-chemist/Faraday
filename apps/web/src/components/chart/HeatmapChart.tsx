@@ -69,114 +69,178 @@ export function HeatmapChart({ data }: Props) {
   const cellH = 56;
   const leftPad = 140;
   const topPad = 40;
-  const bottomPad = 64;
-  // Split into two SVGs side-by-side so the Y axis stays visible when the
-  // cells region scrolls horizontally — same frozen-first-column pattern
-  // Excel / Google Sheets use.
+  const bottomPad = 56;
   const cellsRegionWidth = layout.xCats.length * cellW + 20;
-  const height = topPad + layout.yCats.length * cellH + bottomPad;
+  const cellsRegionHeight = layout.yCats.length * cellH;
+
+  // One 2D scroll container with CSS sticky on each edge — Y labels stick
+  // to the left, X labels stick to the top, X axis title sticks to the
+  // bottom, and the two corner cells stick at their intersections. Cells
+  // scroll freely in the middle when the matrix exceeds maxHeight.
+  const STICKY_BG = faradayTokens.color.surface.base;
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "stretch" }}>
-        {/* Frozen left axis — Y tick labels + Y axis title. Sits outside the
-            overflow container, so it doesn't move when the cells region
-            scrolls horizontally. */}
-        <svg
-          width={leftPad}
-          height={height}
-          style={{ flexShrink: 0, display: "block" }}
-          aria-hidden="false"
+      <div
+        style={{
+          maxHeight: 520,
+          overflow: "auto",
+          border: `1px solid ${GRID_STROKE}`,
+          borderRadius: 8,
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `${leftPad}px ${cellsRegionWidth}px`,
+            gridTemplateRows: `${topPad}px ${cellsRegionHeight}px ${bottomPad}px`,
+            width: "max-content",
+          }}
         >
-          {layout.yCats.map((cat, j) => (
-            <text
-              key={cat}
-              x={leftPad - 12}
-              y={topPad + j * cellH + cellH / 2 + 4}
-              textAnchor="end"
-              style={axisTickStyle}
-            >
-              <title>{cat}</title>
-              {shortLabel(cat, 16)}
-            </text>
-          ))}
-          <text
-            transform={`rotate(-90, 20, ${topPad + (layout.yCats.length * cellH) / 2})`}
-            x={20}
-            y={topPad + (layout.yCats.length * cellH) / 2}
-            textAnchor="middle"
-            style={axisLabelStyle}
+          {/* TL corner — sits above both sticky edges */}
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              left: 0,
+              zIndex: 4,
+              background: STICKY_BG,
+            }}
+          />
+
+          {/* Top: X tick labels — sticky top, scrolls horizontally with cells */}
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 3,
+              background: STICKY_BG,
+            }}
           >
-            {data.y_label}
-          </text>
-        </svg>
+            <svg width={cellsRegionWidth} height={topPad} style={{ display: "block" }}>
+              {layout.xCats.map((cat, i) => (
+                <text
+                  key={cat}
+                  x={i * cellW + cellW / 2}
+                  y={topPad - 12}
+                  textAnchor="middle"
+                  style={axisTickStyle}
+                >
+                  <title>{cat}</title>
+                  {shortLabel(cat, 12)}
+                </text>
+              ))}
+            </svg>
+          </div>
 
-        {/* Scrollable cells region — X labels, cells, and X axis title.
-            Only this band moves under the user's horizontal scroll. */}
-        <div style={{ overflowX: "auto", flex: 1, minWidth: 0 }}>
-          <svg width={cellsRegionWidth} height={height} style={{ display: "block" }}>
-            {/* X axis tick labels — horizontal, truncated, full name on hover */}
-            {layout.xCats.map((cat, i) => (
+          {/* Left: Y tick labels + Y axis title — sticky left */}
+          <div
+            style={{
+              position: "sticky",
+              left: 0,
+              zIndex: 3,
+              background: STICKY_BG,
+            }}
+          >
+            <svg width={leftPad} height={cellsRegionHeight} style={{ display: "block" }}>
+              {layout.yCats.map((cat, j) => (
+                <text
+                  key={cat}
+                  x={leftPad - 12}
+                  y={j * cellH + cellH / 2 + 4}
+                  textAnchor="end"
+                  style={axisTickStyle}
+                >
+                  <title>{cat}</title>
+                  {shortLabel(cat, 16)}
+                </text>
+              ))}
               <text
-                key={cat}
-                x={i * cellW + cellW / 2}
-                y={topPad - 12}
+                transform={`rotate(-90, 20, ${cellsRegionHeight / 2})`}
+                x={20}
+                y={cellsRegionHeight / 2}
                 textAnchor="middle"
-                style={axisTickStyle}
+                style={axisLabelStyle}
               >
-                <title>{cat}</title>
-                {shortLabel(cat, 12)}
+                {data.y_label}
               </text>
-            ))}
+            </svg>
+          </div>
 
-            {/* Cells */}
-            {layout.xCats.map((x, i) =>
-              layout.yCats.map((y, j) => {
-                const cell = layout.cellsByKey.get(`${x}|${y}`);
-                const cx = i * cellW;
-                const cy = topPad + j * cellH;
-                const fill = cell?.value != null
-                  ? heatmapColor(cell.value, layout.vmin, layout.vmax)
-                  : faradayTokens.color.surface.muted;
-                return (
-                  <g key={`${x}|${y}`}>
-                    <rect
-                      x={cx}
-                      y={cy}
-                      width={cellW - 2}
-                      height={cellH - 2}
-                      fill={fill}
-                      stroke={GRID_STROKE}
-                      strokeWidth={cell ? 1 : 0.5}
-                      strokeDasharray={cell ? "0" : "3 3"}
-                      onMouseEnter={() => setHover(cell ?? null)}
-                      onMouseLeave={() => setHover(null)}
-                      style={{ cursor: cell ? "pointer" : "default" }}
-                    />
-                    {cell?.value != null && (
-                      <text
-                        x={cx + cellW / 2 - 1}
-                        y={cy + cellH / 2 + 4}
-                        textAnchor="middle"
-                        style={{ ...axisTickStyle, fill: faradayTokens.color.ink.primary, fontWeight: 500 }}
-                      >
-                        {cell.value.toFixed(1)}
-                      </text>
-                    )}
-                  </g>
-                );
-              })
-            )}
+          {/* Body: cells — scrolls in both directions */}
+          <div>
+            <svg width={cellsRegionWidth} height={cellsRegionHeight} style={{ display: "block" }}>
+              {layout.xCats.map((x, i) =>
+                layout.yCats.map((y, j) => {
+                  const cell = layout.cellsByKey.get(`${x}|${y}`);
+                  const cx = i * cellW;
+                  const cy = j * cellH;
+                  const fill = cell?.value != null
+                    ? heatmapColor(cell.value, layout.vmin, layout.vmax)
+                    : faradayTokens.color.surface.muted;
+                  return (
+                    <g key={`${x}|${y}`}>
+                      <rect
+                        x={cx}
+                        y={cy}
+                        width={cellW - 2}
+                        height={cellH - 2}
+                        fill={fill}
+                        stroke={GRID_STROKE}
+                        strokeWidth={cell ? 1 : 0.5}
+                        strokeDasharray={cell ? "0" : "3 3"}
+                        onMouseEnter={() => setHover(cell ?? null)}
+                        onMouseLeave={() => setHover(null)}
+                        style={{ cursor: cell ? "pointer" : "default" }}
+                      />
+                      {cell?.value != null && (
+                        <text
+                          x={cx + cellW / 2 - 1}
+                          y={cy + cellH / 2 + 4}
+                          textAnchor="middle"
+                          style={{ ...axisTickStyle, fill: faradayTokens.color.ink.primary, fontWeight: 500 }}
+                        >
+                          {cell.value.toFixed(1)}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })
+              )}
+            </svg>
+          </div>
 
-            <text
-              x={(layout.xCats.length * cellW) / 2}
-              y={height - 20}
-              textAnchor="middle"
-              style={axisLabelStyle}
-            >
-              {data.x_label}
-            </text>
-          </svg>
+          {/* BL corner — sticky bottom + left */}
+          <div
+            style={{
+              position: "sticky",
+              bottom: 0,
+              left: 0,
+              zIndex: 4,
+              background: STICKY_BG,
+            }}
+          />
+
+          {/* Bottom: X axis title — sticky bottom */}
+          <div
+            style={{
+              position: "sticky",
+              bottom: 0,
+              zIndex: 3,
+              background: STICKY_BG,
+            }}
+          >
+            <svg width={cellsRegionWidth} height={bottomPad} style={{ display: "block" }}>
+              <text
+                x={(layout.xCats.length * cellW) / 2}
+                y={bottomPad - 20}
+                textAnchor="middle"
+                style={axisLabelStyle}
+              >
+                {data.x_label}
+              </text>
+            </svg>
+          </div>
         </div>
       </div>
 
