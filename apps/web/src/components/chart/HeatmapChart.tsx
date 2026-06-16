@@ -87,7 +87,7 @@ export function HeatmapChart({ data }: Props) {
             const cell = layout.cellsByKey.get(`${x}|${y}`);
             const cx = leftPad + i * cellW;
             const cy = topPad + j * cellH;
-            const fill = cell?.value != null ? heatmapColor(cell.value, layout.vmin, layout.vmax) : faradayTokens.color.surface.warm;
+            const fill = cell?.value != null ? heatmapColor(cell.value, layout.vmin, layout.vmax) : faradayTokens.color.surface.muted;
             return (
               <g key={`${x}|${y}`}>
                 <rect

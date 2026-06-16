@@ -179,7 +179,7 @@ function Section({ title, intent, children }: SectionProps) {
 
 export function ChartsDemo() {
   return (
-    <Box className="min-h-screen bg-surface-warm">
+    <Box className="min-h-screen bg-surface-base">
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Typography
           variant="h1"
@@ -195,7 +195,7 @@ export function ChartsDemo() {
           Each chart type rendered with sample data. Editorial palette per spec §3.0.4.
         </Typography>
         <Box className="font-mono" sx={{ fontSize: 12, mb: 5 }}>
-          <RouterLink to="/" style={{ color: "#B45309" }}>
+          <RouterLink to="/" style={{ color: "#2D6A4F" }}>
             ← back to landing
           </RouterLink>
         </Box>

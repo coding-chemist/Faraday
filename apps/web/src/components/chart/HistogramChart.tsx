@@ -57,7 +57,7 @@ export function HistogramChart({ data }: Props) {
         <Tooltip
           contentStyle={{ background: "#FFFFFF", borderColor: GRID_STROKE, fontSize: 12 }}
         />
-        <Bar dataKey="count" fill={faradayTokens.color.accent.faraday} radius={[4, 4, 0, 0]} />
+        <Bar dataKey="count" fill={faradayTokens.color.forest[700]} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

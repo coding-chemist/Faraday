@@ -14,8 +14,9 @@ export function AskResultView({ result }: Props) {
   const isListChart = result.chart_data.chart_type === "list";
 
   return (
-    <Box sx={{ mt: 8 }}>
+    <Box component="section" aria-label="query result" sx={{ mt: 8 }}>
       <Typography
+        component="div"
         sx={{
           color: faradayTokens.color.ink.secondary,
           fontFamily: faradayTokens.font.mono,
@@ -28,6 +29,7 @@ export function AskResultView({ result }: Props) {
         Showing
       </Typography>
       <Typography
+        component="h2"
         sx={{
           fontSize: { xs: 22, md: 28 },
           fontFamily: faradayTokens.font.display,
@@ -47,7 +49,7 @@ export function AskResultView({ result }: Props) {
           sx={{
             mt: 6,
             background: faradayTokens.color.surface.elevated,
-            border: "1px solid #E5E2DA",
+            border: `1px solid ${faradayTokens.color.forest[100]}`,
             borderRadius: 2,
             p: { xs: 2, md: 4 },
           }}
@@ -59,6 +61,7 @@ export function AskResultView({ result }: Props) {
       {result.matched_experiments.length > 0 && (
         <Box sx={{ mt: 6 }}>
           <Typography
+            component="h3"
             sx={{
               fontSize: 18,
               fontWeight: 600,

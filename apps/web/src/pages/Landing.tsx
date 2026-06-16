@@ -31,7 +31,7 @@ export function Landing() {
   }, []);
 
   return (
-    <Box className="min-h-screen bg-surface-warm">
+    <Box className="min-h-screen bg-surface-base">
       <Container maxWidth="md" className="pt-hero pb-section">
         <Typography
           variant="h1"
@@ -58,7 +58,7 @@ export function Landing() {
         </Box>
 
         <Box className="mt-section font-mono text-sm" sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-          <RouterLink to="/ask" style={{ color: "#B45309", textDecoration: "underline" }}>
+          <RouterLink to="/ask" style={{ color: "#2D6A4F", textDecoration: "underline" }}>
             → open lab memory
           </RouterLink>
           <RouterLink to="/charts-demo" style={{ color: "#5C6360", textDecoration: "underline" }}>

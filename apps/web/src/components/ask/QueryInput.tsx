@@ -62,21 +62,27 @@ export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Pr
             borderColor: faradayTokens.color.botanical.line,
           },
           "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: faradayTokens.color.accent.faraday,
+            borderColor: faradayTokens.color.forest[700],
+            borderWidth: 1,
           },
         }}
+        inputProps={{ "aria-label": "natural-language query" }}
       />
       <Button
         type="submit"
         variant="contained"
         disabled={!canSubmit}
+        aria-label={canSubmit ? "submit query" : "enter at least 2 characters to submit"}
         sx={{
           borderRadius: 999,
-          px: 3.5,
+          px: 4,
           fontSize: 15,
           fontWeight: 500,
-          background: faradayTokens.color.accent.faraday,
-          "&:hover": { background: "#9C470A" },
+          background: faradayTokens.color.forest[700],
+          color: "#FFFFFF",
+          boxShadow: "none",
+          "&:hover": { background: faradayTokens.color.forest[900], boxShadow: "none" },
+          "&.Mui-disabled": { background: faradayTokens.color.forest[100], color: faradayTokens.color.ink.tertiary },
         }}
       >
         Ask

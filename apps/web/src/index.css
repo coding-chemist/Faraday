@@ -8,6 +8,43 @@ body,
   height: 100%;
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
-  background-color: #faf8f3;
+  background-color: #f7faf6;
   color: #1b1f1a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*:focus-visible {
+  outline: 2px solid #2d6a4f;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@keyframes faraday-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.faraday-fade-in {
+  animation: faraday-fade-in 320ms ease-out both;
+}
+
+@keyframes faraday-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.faraday-pulse {
+  animation: faraday-pulse 1.6s ease-in-out infinite;
 }
