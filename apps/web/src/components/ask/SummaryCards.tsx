@@ -99,7 +99,7 @@ export function SummaryCards({ cards }: Props) {
             elevation={0}
             sx={{
               position: "relative",
-              borderRadius: 3,
+              borderRadius: 2,
               overflow: "hidden",
               border: `1px solid ${faradayTokens.color.forest[100]}`,
               transition: "border-color 200ms ease-out, box-shadow 200ms ease-out",
@@ -140,8 +140,12 @@ export function SummaryCards({ cards }: Props) {
                   sx={{
                     fontSize: 24,
                     fontWeight: 600,
-                    fontFamily: faradayTokens.font.display,
+                    // JetBrains Mono on the numeric value matches Curie's editorial
+                    // numerals — same family across portfolio for stat displays.
+                    fontFamily: faradayTokens.font.mono,
+                    fontFeatureSettings: '"tnum" 1',
                     lineHeight: 1.15,
+                    letterSpacing: "-0.01em",
                     color: faradayTokens.color.forest[900],
                   }}
                 >

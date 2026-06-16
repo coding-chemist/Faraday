@@ -87,7 +87,7 @@ class AmideCouplingSeeder(ExperimentSeeder):
             Reagent(name=amine.name, role=ReagentRole.REAGENT, cas=amine.cas, mw=amine.mw,
                     equivalents=amine_eq, mass_g=round(substrate_mmol * amine_eq * amine.mw / 1000, 3),
                     moles_mmol=round(substrate_mmol * amine_eq, 2), supplier=amine.supplier),
-            Reagent(name=coupler.name, role=ReagentRole.REAGENT, cas=coupler.cas, mw=coupler.mw,
+            Reagent(name=coupler.name, role=ReagentRole.CATALYST, cas=coupler.cas, mw=coupler.mw,
                     equivalents=coupler_eq, mass_g=round(substrate_mmol * coupler_eq * coupler.mw / 1000, 3),
                     moles_mmol=round(substrate_mmol * coupler_eq, 2), supplier=coupler.supplier),
             Reagent(name=base.name, role=ReagentRole.BASE, cas=base.cas, mw=base.mw,

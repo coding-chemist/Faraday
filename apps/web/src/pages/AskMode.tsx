@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -98,40 +98,58 @@ export function AskMode() {
         )}
 
         {error && !loading && (
-          <Box sx={{ mt: 4, maxWidth: 760, mx: "auto" }} role="alert">
-            <Alert
-              severity="error"
-              variant="outlined"
+          <Box
+            className="faraday-fade-in"
+            role="alert"
+            sx={{
+              mt: 4,
+              textAlign: "center",
+              maxWidth: 560,
+              mx: "auto",
+              p: 4,
+              background: faradayTokens.color.surface.muted,
+              borderRadius: 2,
+            }}
+          >
+            <Typography
               sx={{
-                background: "#FDF1EC",
-                borderRadius: 2,
-                border: `1px solid #F5C2A7`,
-                color: faradayTokens.color.ink.primary,
-                "& .MuiAlert-icon": { color: faradayTokens.color.state.error },
-                "& .MuiAlert-message": {
-                  fontFamily: faradayTokens.font.body,
-                  width: "100%",
-                },
+                fontFamily: faradayTokens.font.mono,
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: faradayTokens.color.ink.secondary,
+                mb: 1,
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
-                <span>{error}</span>
-                {lastQuery && (
-                  <Button
-                    size="small"
-                    onClick={handleRetry}
-                    startIcon={<RefreshIcon />}
-                    sx={{
-                      color: faradayTokens.color.forest[700],
-                      whiteSpace: "nowrap",
-                      "&:hover": { background: faradayTokens.color.forest[50] },
-                    }}
-                  >
-                    Try again
-                  </Button>
-                )}
-              </Box>
-            </Alert>
+              Couldn't read that one
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 20,
+                fontFamily: faradayTokens.font.display,
+                fontWeight: 500,
+                color: faradayTokens.color.ink.primary,
+                mb: 2,
+                lineHeight: 1.3,
+              }}
+            >
+              Try rewording, or pick a starter below.
+            </Typography>
+            {lastQuery && (
+              <Button
+                size="small"
+                onClick={handleRetry}
+                startIcon={<RefreshIcon />}
+                sx={{
+                  mb: 2,
+                  color: faradayTokens.color.forest[700],
+                  "&:hover": { background: faradayTokens.color.forest[50] },
+                }}
+              >
+                Try again
+              </Button>
+            )}
+            <SuggestedQueries onSelect={handleSubmit} disabled={loading} compact />
           </Box>
         )}
 

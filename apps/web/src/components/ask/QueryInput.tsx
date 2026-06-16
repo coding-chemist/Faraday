@@ -1,6 +1,6 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { faradayTokens } from "../../design/theme";
 
@@ -12,6 +12,13 @@ interface Props {
 
 export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Props) {
   const [value, setValue] = useState(initialValue);
+
+  // Sync internal state when parent pushes a new query (e.g. SuggestedQueries
+  // chip click, deep-link, "Try again"). Without this the chip-submit path
+  // runs the query but the box stays empty / stale.
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
   const trimmed = value.trim();
   const canSubmit = trimmed.length >= 2 && !disabled;
 

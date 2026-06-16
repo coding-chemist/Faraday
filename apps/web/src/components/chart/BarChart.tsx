@@ -17,25 +17,38 @@ interface Props {
 }
 
 export function BarChart({ data }: Props) {
-  const rows = data.points.map((p) => ({ x: String(p.x), y: p.y ?? 0, count: p.count }));
+  // Filter out (unknown) buckets when there's real data to show beside them —
+  // they're a hint that some rows lack the grouping field, not actual content.
+  const filtered = data.points.filter((p) => p.x !== "(unknown)");
+  const rows = (filtered.length > 0 ? filtered : data.points).map((p) => ({
+    x: String(p.x),
+    y: p.y ?? 0,
+    count: p.count,
+  }));
+
+  // Truncate long category names so the 0° x-axis stays legible at any width.
+  // Full name remains in the tooltip.
+  const tickFormatter = (value: string) =>
+    value.length > 14 ? `${value.slice(0, 13)}…` : value;
 
   return (
     <ResponsiveContainer width="100%" height={420}>
-      <RBar data={rows} margin={{ top: 16, right: 24, bottom: 56, left: 24 }}>
+      <RBar data={rows} margin={{ top: 16, right: 24, bottom: 40, left: 24 }}>
         <CartesianGrid stroke={GRID_STROKE} strokeDasharray="3 3" opacity={0.3} vertical={false} />
         <XAxis
           dataKey="x"
           tick={axisTickStyle}
+          tickFormatter={tickFormatter}
           axisLine={{ stroke: AXIS_INK }}
           tickLine={{ stroke: AXIS_INK }}
           interval={0}
-          angle={-25}
-          textAnchor="end"
-          height={56}
+          angle={0}
+          textAnchor="middle"
+          height={36}
           label={{
             value: data.x_label,
             position: "insideBottom",
-            offset: -48,
+            offset: -20,
             style: axisLabelStyle,
           }}
         />
