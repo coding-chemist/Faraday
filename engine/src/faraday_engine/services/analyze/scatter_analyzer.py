@@ -27,9 +27,21 @@ class ScatterAnalyzer(ChartAnalyzer):
             for _, row in valid.iterrows()
         ]
 
+        threshold_y: float | None = None
+        threshold_label: str | None = None
+        if metric == "yield_pct":
+            if spec.yield_max is not None:
+                threshold_y = spec.yield_max
+                threshold_label = f"yield ≤ {spec.yield_max:g}%"
+            elif spec.yield_min is not None:
+                threshold_y = spec.yield_min
+                threshold_label = f"yield ≥ {spec.yield_min:g}%"
+
         return ChartData(
             chart_type=ChartType.SCATTER,
             x_label="Date",
             y_label=metric.replace("_", " ").title(),
             points=points,
+            threshold_y=threshold_y,
+            threshold_y_label=threshold_label,
         )

@@ -1,9 +1,10 @@
-// Right rail container — soft watercolor sage wash backdrop per mockup.
-// Page passes children (e.g. Watch teaser, past-runs widget).
+// Right rail — sage watercolor backdrop with visible texture, edge bleed, paper grain.
+// Replaces the previous flat linear gradient.
 
 import { Box } from "@mui/material";
 
 import { faradayTokens } from "../../design/theme";
+import { WatercolorWash } from "./WatercolorWash";
 
 interface Props {
   children: React.ReactNode;
@@ -19,27 +20,21 @@ export function RightRail({ children }: Props) {
         flexShrink: 0,
         position: "relative",
         borderLeft: `1px solid ${faradayTokens.color.forest[100]}`,
-        background: `linear-gradient(180deg, ${faradayTokens.color.surface.muted} 0%, ${faradayTokens.color.forest[50]} 100%)`,
-        px: 3,
-        py: 4,
-        overflowY: "auto",
+        overflow: "hidden",
       }}
     >
-      {/* Faint watercolor wash decoration */}
+      <WatercolorWash variant="pronounced" seed={11} />
       <Box
-        aria-hidden
         sx={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: "100%",
-          height: 280,
-          background:
-            "radial-gradient(circle at 80% 20%, rgba(82, 183, 136, 0.18) 0%, transparent 60%)",
-          pointerEvents: "none",
+          position: "relative",
+          px: 3,
+          py: 4,
+          height: "100%",
+          overflowY: "auto",
         }}
-      />
-      <Box sx={{ position: "relative" }}>{children}</Box>
+      >
+        {children}
+      </Box>
     </Box>
   );
 }

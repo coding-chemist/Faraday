@@ -39,6 +39,8 @@ export interface ChartData {
   points: ChartPoint[];
   heatmap_cells: HeatmapCell[];
   histogram_bins: HistogramBin[];
+  threshold_y?: number | null;
+  threshold_y_label?: string | null;
 }
 
 export interface SummaryCard {

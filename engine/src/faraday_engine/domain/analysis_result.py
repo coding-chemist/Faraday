@@ -70,6 +70,10 @@ class ChartData(BaseModel):
     heatmap_cells: list[HeatmapCell] = Field(default_factory=list)
     histogram_bins: list[HistogramBin] = Field(default_factory=list)
 
+    # Reference lines — e.g. dashed horizontal at the yield_max threshold the user filtered on.
+    threshold_y: float | None = None
+    threshold_y_label: str | None = None
+
 
 class AnalysisResult(BaseModel):
     """What AnalyzeService.analyze returns. Drives the entire Ask-mode UI render."""

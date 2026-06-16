@@ -7,7 +7,7 @@ import { LoadingSkeleton } from "../components/ask/LoadingSkeleton";
 import { QueryInput } from "../components/ask/QueryInput";
 import { SuggestedQueries } from "../components/ask/SuggestedQueries";
 import { WatchTeaser } from "../components/ask/WatchTeaser";
-import { AppShell } from "../components/shell";
+import { AppShell, WatercolorPanel } from "../components/shell";
 import { faradayTokens } from "../design/theme";
 import { ApiError, ask } from "../lib/api";
 import type { AnalysisResult } from "../types/analysis";
@@ -52,23 +52,39 @@ export function AskMode() {
       crumbs={[{ label: "Lab memory" }, { label: "Ask" }]}
       rightRail={<WatchTeaser />}
     >
-      <Box sx={{ maxWidth: 980, mx: "auto" }}>
-        <QueryInput onSubmit={handleSubmit} disabled={loading} initialValue={query} />
+      <Box sx={{ maxWidth: 1040, mx: "auto" }}>
+        <WatercolorPanel variant="subtle" seed={3}>
+          <QueryInput onSubmit={handleSubmit} disabled={loading} initialValue={query} />
+          {!result && !loading && !error && (
+            <Box sx={{ mt: 2 }}>
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  color: faradayTokens.color.ink.secondary,
+                  fontStyle: "italic",
+                  textAlign: "center",
+                }}
+              >
+                Try: 'find experiments where I used Pd(OAc)₂' or 'average yield for recrystallization in ethanol'
+              </Typography>
+            </Box>
+          )}
+        </WatercolorPanel>
 
         {!result && !loading && !error && (
-          <Box sx={{ mt: 2.5 }}>
+          <Box sx={{ mt: 3 }}>
             <SuggestedQueries onSelect={handleSubmit} disabled={loading} />
           </Box>
         )}
 
         {loading && (
-          <Box sx={{ mt: 6 }} aria-live="polite" aria-busy="true">
+          <Box sx={{ mt: 4 }} aria-live="polite" aria-busy="true">
             <LoadingSkeleton />
           </Box>
         )}
 
         {error && !loading && (
-          <Box sx={{ mt: 5, maxWidth: 760, mx: "auto" }} role="alert">
+          <Box sx={{ mt: 4, maxWidth: 760, mx: "auto" }} role="alert">
             <Alert
               severity="error"
               variant="outlined"
@@ -109,7 +125,7 @@ export function AskMode() {
           <Box
             className="faraday-fade-in"
             sx={{
-              mt: 6,
+              mt: 4,
               textAlign: "center",
               maxWidth: 560,
               mx: "auto",
