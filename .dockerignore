@@ -1,0 +1,70 @@
+# Keep the HF Spaces image slim by excluding everything that doesn't belong.
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Frontend lives on Vercel, never enters the API image
+apps/web
+
+# Python runtime cruft
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.egg-info
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.coverage
+**/htmlcov
+**/.venv
+.venv
+venv
+
+# Runtime artifacts
+data
+*.db
+*.sqlite
+*.sqlite3
+faiss_index
+celerybeat-schedule
+celerybeat-schedule.db
+
+# Env files (secrets via HF Space env, never baked into image)
+.env
+.env.local
+.env.*.local
+.env.example
+
+# Editor + OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Tests (production image doesn't need them)
+tests
+**/test_*.py
+
+# Docs + assets that don't run code
+docs
+assets
+LICENSE
+README.md
+*.md
+
+# Other infra (we only want hf-spaces here)
+infra/docker-compose.yml
+
+# Node / Vite (frontend)
+node_modules
+**/node_modules
+dist
+.vite
+
+# Claude / IDE local state
+.claude

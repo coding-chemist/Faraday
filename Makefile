@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse
+.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run
 
 install:
 	uv sync
@@ -58,3 +58,17 @@ clean:
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
+
+# --- HF Spaces image ---
+
+docker-hf-build:
+	docker build -f infra/hf-spaces/Dockerfile -t faraday-hf .
+
+docker-hf-run:
+	@if [ -z "$$FARADAY_LLM_CONFIG__API_KEY" ]; then \
+	  echo "WARN: FARADAY_LLM_CONFIG__API_KEY not set — Ollama Cloud calls will fail."; \
+	fi
+	docker run --rm -p 7860:7860 \
+	  -e FARADAY_LLM_CONFIG__API_KEY="$$FARADAY_LLM_CONFIG__API_KEY" \
+	  -e FARADAY_CORS_ORIGINS="$${FARADAY_CORS_ORIGINS:-http://localhost:5173}" \
+	  faraday-hf
