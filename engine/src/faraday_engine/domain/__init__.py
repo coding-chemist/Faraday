@@ -12,6 +12,7 @@ from faraday_engine.domain.query_spec import GroupBy
 from faraday_engine.domain.query_spec import Metric
 from faraday_engine.domain.query_spec import QuerySpec
 
+
 __all__ = [
     "Aggregation",
     "ChartType",

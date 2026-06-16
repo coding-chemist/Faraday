@@ -1,15 +1,21 @@
 """QueryParserService — converts NL queries to validated QuerySpec via the LLM provider.
 
-The prompt teaches the schema + injects today's date for relative-date resolution.
-instructor + Pydantic handle JSON shape + retries; we only ship the prompt + service.
+The prompt is auto-generated from the QuerySpec enums — adding a new enum value
+(chart_type, group_by, aggregation, metric) automatically appears in the prompt.
+No prompt edit needed.
+
+instructor + Pydantic handle JSON shape + retries inside the provider; we only ship
+the prompt + service.
 """
 from datetime import datetime
+from datetime import timedelta
 
 from faraday_engine.domain.experiment import ExperimentStatus
 from faraday_engine.domain.experiment import ExperimentType
 from faraday_engine.domain.query_spec import Aggregation
 from faraday_engine.domain.query_spec import ChartType
 from faraday_engine.domain.query_spec import GroupBy
+from faraday_engine.domain.query_spec import Metric
 from faraday_engine.domain.query_spec import QuerySpec
 from faraday_engine.providers.llm.base import LLMProvider
 from faraday_shared.logging import get_logger
@@ -25,20 +31,23 @@ Convert the chemist's natural-language question into a QuerySpec JSON object.
 Today is {today_iso}. Resolve any relative dates (e.g. "last 6 months", "this year") to
 absolute ISO datetimes using this reference.
 
-Available reaction_type values: {types}
-Available status values: {statuses}
-Available chart_type values: {charts}
-Available group_by values: {groups}
-Available aggregation values: {aggs}
-Available metric values: yield_pct, purity_pct, temperature_c, time_min
+ENUMS (use exact values):
+  reaction_type:         {types}
+  status:                {statuses}
+  chart_type:            {charts}
+  group_by:              {groups}
+  group_by_secondary:    {groups}     (only used for heatmap; otherwise leave as "none")
+  aggregation:           {aggs}
+  metric:                {metrics}
 
 GUIDELINES
-- Leave fields null when the user didn't constrain them.
+- Leave filter fields null when the user didn't constrain them.
 - "yield below X" => yield_max=X. "yield above X" => yield_min=X.
 - "compare A vs B by X" => group_by=X, chart_type=bar.
 - "trend over time" / "by month" => chart_type=timeseries, group_by=month.
 - "show me" / "list" with no metric implies chart_type=list.
 - "distribution of yields" => chart_type=histogram, metric=yield_pct.
+- "X by Y across Z" or "X by Y AND Z" => chart_type=heatmap, group_by=Y, group_by_secondary=Z.
 - "intent" is a one-sentence restatement of what you understood, written for the chemist.
 
 EXAMPLES
@@ -78,6 +87,17 @@ Output:
   "intent": "Average yield grouped by reaction type for the current year"
 }}
 
+User: "Yield by catalyst across solvents"
+Output:
+{{
+  "chart_type": "heatmap",
+  "group_by": "catalyst",
+  "group_by_secondary": "solvent",
+  "aggregation": "mean",
+  "metric": "yield_pct",
+  "intent": "Average yield as a heatmap of catalyst × solvent"
+}}
+
 Now convert this query:
 User: "{user_query}"
 Output:
@@ -85,9 +105,6 @@ Output:
 
 
 def _build_prompt(user_query: str, today: datetime) -> str:
-    six_months_ago = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    # Approximate 6 months back: subtract 180 days
-    from datetime import timedelta
     six_months_ago = today - timedelta(days=180)
     year_start = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -100,6 +117,7 @@ def _build_prompt(user_query: str, today: datetime) -> str:
         charts=", ".join(c.value for c in ChartType),
         groups=", ".join(g.value for g in GroupBy),
         aggs=", ".join(a.value for a in Aggregation),
+        metrics=", ".join(m.value for m in Metric),
         user_query=user_query,
     )
 
@@ -120,6 +138,7 @@ class QueryParserService:
             "query.parse.done",
             chart_type=spec.chart_type,
             group_by=spec.group_by,
+            group_by_secondary=spec.group_by_secondary,
             reaction_type=spec.reaction_type,
             intent=spec.intent,
         )

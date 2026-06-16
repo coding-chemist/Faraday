@@ -9,6 +9,7 @@ from faraday_engine.domain.experiment import ExperimentType
 from faraday_engine.domain.query_spec import Aggregation
 from faraday_engine.domain.query_spec import ChartType
 from faraday_engine.domain.query_spec import GroupBy
+from faraday_engine.domain.query_spec import Metric
 from faraday_engine.domain.query_spec import QuerySpec
 from faraday_engine.services.query_parser_service import QueryParserService
 from tests.fakes.fake_llm import FakeLLMProvider
@@ -67,6 +68,14 @@ def test_prompt_lists_every_chart_type(fake_llm: FakeLLMProvider, canned_spec: Q
         assert c.value in prompt
 
 
+def test_prompt_lists_every_metric(fake_llm: FakeLLMProvider, canned_spec: QuerySpec):
+    fake_llm.canned_response = canned_spec
+    QueryParserService(llm=fake_llm).parse("test")
+    prompt = fake_llm.prompts_received[0]
+    for m in Metric:
+        assert m.value in prompt
+
+
 def test_returns_spec_from_llm_unchanged(fake_llm: FakeLLMProvider, canned_spec: QuerySpec):
     fake_llm.canned_response = canned_spec
     service = QueryParserService(llm=fake_llm)
@@ -116,5 +125,53 @@ def test_query_spec_defaults_are_sensible():
     spec = QuerySpec(intent="just a list")
     assert spec.chart_type == ChartType.SCATTER.value
     assert spec.group_by == GroupBy.NONE.value
+    assert spec.group_by_secondary == GroupBy.NONE.value
     assert spec.aggregation == Aggregation.COUNT.value
-    assert spec.metric == "yield_pct"
+    assert spec.metric == Metric.YIELD_PCT.value
+
+
+# --- Heatmap-specific validation ---
+
+def test_heatmap_requires_both_group_by_dims():
+    with pytest.raises(ValidationError, match="heatmap requires both group_by"):
+        QuerySpec(
+            intent="heatmap missing secondary",
+            chart_type=ChartType.HEATMAP,
+            group_by=GroupBy.CATALYST,
+        )
+
+
+def test_heatmap_requires_distinct_group_dims():
+    with pytest.raises(ValidationError, match="must differ"):
+        QuerySpec(
+            intent="heatmap with same dims",
+            chart_type=ChartType.HEATMAP,
+            group_by=GroupBy.CATALYST,
+            group_by_secondary=GroupBy.CATALYST,
+        )
+
+
+def test_heatmap_accepts_two_distinct_group_dims():
+    spec = QuerySpec(
+        intent="catalyst × solvent",
+        chart_type=ChartType.HEATMAP,
+        group_by=GroupBy.CATALYST,
+        group_by_secondary=GroupBy.SOLVENT,
+        aggregation=Aggregation.MEAN,
+        metric=Metric.YIELD_PCT,
+    )
+    assert spec.chart_type == ChartType.HEATMAP.value
+    assert spec.group_by == GroupBy.CATALYST.value
+    assert spec.group_by_secondary == GroupBy.SOLVENT.value
+
+
+def test_non_heatmap_normalizes_group_by_secondary_to_none():
+    """A non-heatmap chart with group_by_secondary set should silently normalize to NONE,
+    not error — keeps the analyzer/renderer simple."""
+    spec = QuerySpec(
+        intent="bar chart, secondary should be ignored",
+        chart_type=ChartType.BAR,
+        group_by=GroupBy.CATALYST,
+        group_by_secondary=GroupBy.SOLVENT,
+    )
+    assert spec.group_by_secondary == GroupBy.NONE.value

@@ -80,3 +80,12 @@ def test_suzukis_grouped_by_solvent(parser):
 def test_intent_is_populated(parser):
     spec = parser.parse("any random query about reactions")
     assert spec.intent and len(spec.intent) >= 4
+
+
+def test_heatmap_catalyst_by_solvent(parser):
+    spec = parser.parse("Show yield by catalyst across solvents")
+    assert spec.chart_type == "heatmap"
+    # Both dims set, both differ
+    assert spec.group_by in {"catalyst", "solvent"}
+    assert spec.group_by_secondary in {"catalyst", "solvent"}
+    assert spec.group_by != spec.group_by_secondary
