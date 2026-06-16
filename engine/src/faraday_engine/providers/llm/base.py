@@ -14,7 +14,7 @@ class ProviderConfig(BaseModel):
 
 
 class LLMProvider(ABC):
-    """Base interface for any LLM provider (Ollama, Claude, OpenAI, ...)."""
+    """Base interface for any local LLM provider (Ollama local, Ollama Cloud, ...)."""
 
     name: ClassVar[str] = ""
 
