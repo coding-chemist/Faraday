@@ -55,8 +55,8 @@ RUN uv sync --no-dev
 RUN mkdir -p /app/data && chmod 777 /app/data
 
 # Supervisord process orchestration
-COPY infra/hf-spaces/supervisord.conf /etc/supervisor/conf.d/faraday.conf
-COPY infra/hf-spaces/entrypoint.sh /entrypoint.sh
+COPY supervisord.conf /etc/supervisor/conf.d/faraday.conf
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # HF Spaces default port

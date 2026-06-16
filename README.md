@@ -1,3 +1,14 @@
+---
+title: Faraday API
+emoji: 🧪
+colorFrom: green
+colorTo: emerald
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: AI-assisted lab notebook backend
+---
+
 # Faraday
 
 > *Record like Faraday. Search like Google. Your lab's memory.*
