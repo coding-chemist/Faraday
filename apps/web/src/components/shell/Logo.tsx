@@ -1,6 +1,6 @@
-// The F+ tile — deep forest square with a serif F (Fraunces) and a Material
-// AutoAwesome sparkle icon in the top-right corner. The F is text (letter,
-// not icon); the sparkle is Google's Material AutoAwesome icon.
+// The F+ tile — deep forest square with a monospaced F (JetBrains Mono) and a
+// Material AutoAwesome sparkle icon in the top-right corner. The F is text
+// (letter, not icon); the sparkle is Google's Material AutoAwesome icon.
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { Box, Typography } from "@mui/material";

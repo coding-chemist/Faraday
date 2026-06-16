@@ -39,7 +39,7 @@ export default function App() {
             <ComingSoon
               title="Experiment editor"
               crumbs={[{ label: "Notebook" }, { label: "New experiment" }]}
-              blurb="The block-based editor — reagent table, checkpoints, observation, data ingest, calculation, witness signature — modeled on the BRD-GEN editor pattern. Coming in v0.2."
+              blurb="The block-based editor — reagent table, checkpoints, observation, data ingest, calculation, witness signature. Slash-command block insertion, drag handles, inline AI suggestions. Coming in v0.2."
             />
           }
         />

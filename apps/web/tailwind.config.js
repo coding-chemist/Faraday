@@ -37,9 +37,11 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Fraunces", "Tiempos Headline", "Georgia", "serif"],
-        body: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        // Single-family system — JetBrains Mono everywhere. Slot names kept
+        // so `font-display` / `font-body` Tailwind classes still resolve.
+        display: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        body: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       spacing: {
         card: "24px",

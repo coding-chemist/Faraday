@@ -28,10 +28,15 @@ const botanical = {
   line: "#9CA89A",
 } as const;
 
+// JetBrains Mono is the entire typography system — same family on
+// headlines, body, numerals, code. Slot names kept (display / body / mono)
+// so component sx that reads font.display vs font.body still works; they
+// just resolve to the same stack now.
+const FAMILY = '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace';
 const font = {
-  display: '"Fraunces", "Tiempos Headline", Georgia, serif',
-  body: '"Inter", system-ui, sans-serif',
-  mono: '"JetBrains Mono", ui-monospace, monospace',
+  display: FAMILY,
+  body: FAMILY,
+  mono: FAMILY,
 } as const;
 
 export const productTokens = {

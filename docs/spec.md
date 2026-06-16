@@ -69,7 +69,7 @@ The thesis: **modern AI + modern UX can collapse the documentation-versus-doing 
 - Smart audit trail — preserves immutability AND makes history readable
 - Word-doc-like editing UX, not form-based — chemists own the prose, AI fills the scaffolding
 
-**Critical wedge**: editing IS the work. Unlike published research papers where editing is for authors only, lab notebook entries are *in-progress* documents that chemists continuously author. The editable doc UX (Sindhuja's BRD-GEN engineering) maps to this use case perfectly.
+**Critical wedge**: editing IS the work. Unlike published research papers where editing is for authors only, lab notebook entries are *in-progress* documents that chemists continuously author. The editable-doc UX pattern (block-based, draggable, slash-command insertion) maps to this use case perfectly.
 
 ---
 
@@ -211,7 +211,7 @@ Workflow:
    - Methods section draft (from procedures and reagent tables)
    - Results section with auto-formatted data tables
    - Figure suite composed from instrument outputs
-3. Chemist edits in Faraday's editor (the BRD-GEN-style editable doc UX is the wedge here)
+3. Chemist edits in Faraday's editor (the block-based editable-doc UX is the wedge here)
 4. Exports to journal-ready format (PDF, DOCX with journal templates)
 
 **v0.1 does NOT ship Publication Mode** — it's a v0.2/v0.3 feature.
@@ -361,9 +361,9 @@ The whole product should feel **under-filled, not over-filled** — generous bre
 - **Editor canvas**: max-width 880px (readable measure), centered with breathing margins
 - **Lab Memory Watch sidebar**: 320px fixed right (desktop), collapses to floating button (tablet/mobile)
 
-### 3.0.7 Editor model (the BRD-GEN inheritance)
+### 3.0.7 Editor model
 
-Same block-based editor pattern as BRD-GEN (general engineering knowledge, reimplemented from scratch):
+Block-based editor pattern (Notion-style structured doc, reimplemented from scratch for the lab-notebook domain):
 
 - **Blocks**: paragraph, heading, reagent table, checkpoint, observation, instrument data, calculation, plot, witness signature
 - **Block-level controls**: drag handle (left), block menu (right), insert-below (between blocks)
