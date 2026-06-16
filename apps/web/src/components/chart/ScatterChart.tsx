@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 import { faradayTokens } from "../../design/theme";
-import type { ChartData, ChartPoint } from "../../types/analysis";
+import type { ChartData } from "../../types/analysis";
 import {
   AXIS_INK,
   GRID_STROKE,

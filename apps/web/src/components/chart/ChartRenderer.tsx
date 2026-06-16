@@ -5,7 +5,7 @@
 
 import { ComponentType } from "react";
 
-import type { AnalysisResult, ChartData, ChartType, MatchedExperiment } from "../../types/analysis";
+import type { AnalysisResult, ChartData, ChartType } from "../../types/analysis";
 import { BarChart } from "./BarChart";
 import { HeatmapChart } from "./HeatmapChart";
 import { HistogramChart } from "./HistogramChart";
@@ -15,10 +15,6 @@ import { TimeseriesChart } from "./TimeseriesChart";
 
 interface ChartProps {
   data: ChartData;
-}
-
-interface ListProps {
-  experiments: MatchedExperiment[];
 }
 
 // Charts that take a ChartData. ListView is special-cased (it takes experiments).

@@ -15,11 +15,6 @@ interface Props {
   data: ChartData;
 }
 
-interface Series {
-  name: string;
-  points: { x: string; y: number; count?: number | null }[];
-}
-
 function pivotByMonth(points: ChartPoint[]): { rows: Record<string, string | number>[]; series: string[] } {
   // Recharts LineChart wants rows keyed by month, columns per series
   const months = new Set<string>();
