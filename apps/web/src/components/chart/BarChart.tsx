@@ -10,6 +10,7 @@ import {
 } from "recharts";
 
 import type { ChartData } from "../../types/analysis";
+import { humanize } from "../../lib/format";
 import { AXIS_INK, GRID_STROKE, SERIES_COLORS, axisLabelStyle, axisTickStyle } from "./theme";
 
 interface Props {
@@ -21,7 +22,7 @@ export function BarChart({ data }: Props) {
   // they're a hint that some rows lack the grouping field, not actual content.
   const filtered = data.points.filter((p) => p.x !== "(unknown)");
   const rows = (filtered.length > 0 ? filtered : data.points).map((p) => ({
-    x: String(p.x),
+    x: humanize(String(p.x)),
     y: p.y ?? 0,
     count: p.count,
   }));
@@ -65,6 +66,10 @@ export function BarChart({ data }: Props) {
         />
         <Tooltip
           contentStyle={{ background: "#FFFFFF", borderColor: GRID_STROKE, fontSize: 12 }}
+          // Default Recharts cursor is a full-height grey bar that visually
+          // suggests the actual bar reaches the top of the chart — misleading.
+          // Use a soft forest tint that just frames the column instead.
+          cursor={{ fill: "rgba(45, 106, 79, 0.06)" }}
           formatter={(value: number, _name, { payload }) => [
             payload?.count != null ? `${value} (n=${payload.count})` : value,
             data.y_label,
