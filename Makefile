@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run web-build web-preview smoke-llm
+.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run web-build web-preview smoke-llm hf-deploy
 
 install:
 	uv sync
@@ -90,3 +90,14 @@ smoke-llm:
 	fi
 	@echo "Probing $$FARADAY_API_URL/health/llm ..."
 	@curl -sS "$$FARADAY_API_URL/health/llm" | python -m json.tool
+
+# --- HF Spaces deploy ---
+
+hf-deploy:
+	@if [ -z "$$HF_TOKEN" ]; then \
+	  echo "ERROR: HF_TOKEN not set."; \
+	  echo "  Get one at https://huggingface.co/settings/tokens (Write scope)"; \
+	  echo "  Then: export HF_TOKEN=hf_xxxxxxx && make hf-deploy"; \
+	  exit 1; \
+	fi
+	bash scripts/hf-deploy.sh "$${HF_SPACE:-coding-chemist/faraday}"
