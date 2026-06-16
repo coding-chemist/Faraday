@@ -12,7 +12,7 @@
 
 import { useId } from "react";
 
-type Variant = "subtle" | "pronounced" | "card";
+type Variant = "subtle" | "pronounced" | "card" | "editorial";
 
 interface Props {
   variant?: Variant;
@@ -162,6 +162,24 @@ const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
       { cx: 85, cy: 80, r: 60, color: "#C9E4D2", opacity: 0.4 },
       { cx: 50, cy: 50, r: 50, color: "#EFF5EF", opacity: 0.5 },
       { cx: 80, cy: 25, r: 30, color: "#8FB89A", opacity: 0.12 },
+    ],
+  },
+  // §3.1 editorial register — cream paper base + amber + pressed botanical
+  // greens. Used by the marketing Landing only; product UI stays on the
+  // green register.
+  editorial: {
+    base: "#FAF8F3",
+    paperFrequency: 0.6,
+    paperOpacity: 0.25,
+    edgeFrequency: 0.014,
+    edgeScale: 10,
+    washes: [
+      { cx: 10, cy: 14, r: 55, color: "#FFF1D6", opacity: 0.75 },
+      { cx: 86, cy: 22, r: 50, color: "#E8DCC5", opacity: 0.55 },
+      { cx: 22, cy: 78, r: 50, color: "#D9E5D2", opacity: 0.5 },
+      { cx: 78, cy: 82, r: 48, color: "#F5C26B", opacity: 0.18 },
+      { cx: 52, cy: 48, r: 42, color: "#FAF1DC", opacity: 0.65 },
+      { cx: 92, cy: 60, r: 32, color: "#B45309", opacity: 0.08 },
     ],
   },
 };

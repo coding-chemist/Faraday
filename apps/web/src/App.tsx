@@ -33,6 +33,16 @@ export default function App() {
         />
         <Route path="/charts-demo" element={<ChartsDemo />} />
         <Route path="/ask" element={<AskMode />} />
+        <Route
+          path="/experiment/new"
+          element={
+            <ComingSoon
+              title="Experiment editor"
+              crumbs={[{ label: "Notebook" }, { label: "New experiment" }]}
+              blurb="The block-based editor — reagent table, checkpoints, observation, data ingest, calculation, witness signature — modeled on the BRD-GEN editor pattern. Coming in v0.2."
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
