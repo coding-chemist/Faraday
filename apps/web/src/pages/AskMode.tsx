@@ -68,7 +68,12 @@ export function AskMode() {
     >
       <Box sx={{ maxWidth: 1040, mx: "auto" }}>
         <WatercolorPanel variant="subtle" seed={3}>
-          <QueryInput onSubmit={handleSubmit} disabled={loading} initialValue={query} />
+          <QueryInput
+            value={query}
+            onChange={setQuery}
+            onSubmit={handleSubmit}
+            disabled={loading}
+          />
           {!result && !loading && !error && (
             <Box sx={{ mt: 2 }}>
               <Typography

@@ -1,24 +1,17 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
 
 import { faradayTokens } from "../../design/theme";
 
 interface Props {
-  initialValue?: string;
+  /** Fully controlled — parent owns the text. */
+  value: string;
+  onChange: (next: string) => void;
   disabled?: boolean;
   onSubmit: (query: string) => void;
 }
 
-export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Props) {
-  const [value, setValue] = useState(initialValue);
-
-  // Sync internal state when parent pushes a new query (e.g. SuggestedQueries
-  // chip click, deep-link, "Try again"). Without this the chip-submit path
-  // runs the query but the box stays empty / stale.
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+export function QueryInput({ value, onChange, disabled = false, onSubmit }: Props) {
   const trimmed = value.trim();
   const canSubmit = trimmed.length >= 2 && !disabled;
 
@@ -45,7 +38,7 @@ export function QueryInput({ initialValue = "", disabled = false, onSubmit }: Pr
         autoFocus
         placeholder="Show Suzuki couplings with yield below 70% in the last six months…"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         InputProps={{
           startAdornment: (

@@ -206,19 +206,26 @@ export function ListView({ experiments }: Props) {
           }}
         >
           <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
+            {/*
+              Type column intentionally removed — the title already starts
+              with the reaction class ("Suzuki coupling of ..."), so a
+              separate Type cell was redundant and stealing width from
+              Status (which was clipping "completed" → "complet…").
+              Six columns sum to 100% with comfortable padding for the
+              widest realistic values: a long catalyst name still gets
+              ellipsis treatment with full text in title="".
+            */}
             <colgroup>
-              <col style={{ width: "28%" }} />
-              <col style={{ width: "12%" }} />
+              <col style={{ width: "30%" }} />
               <col style={{ width: "22%" }} />
-              <col style={{ width: "12%" }} />
-              <col style={{ width: "9%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "7%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "8%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "14%" }} />
             </colgroup>
             <TableHead>
               <TableRow>
                 <TableCell sx={HEADER_SX}>Title</TableCell>
-                <TableCell sx={HEADER_SX}>Type</TableCell>
                 <TableCell sx={HEADER_SX}>Catalyst</TableCell>
                 <TableCell sx={HEADER_SX}>Solvent</TableCell>
                 <TableCell sx={HEADER_SX} align="right">Yield</TableCell>
@@ -239,9 +246,6 @@ export function ListView({ experiments }: Props) {
                   <TableCell sx={{ ...CELL_SX, ...TITLE_CLAMP }} title={exp.title}>
                     {exp.title}
                   </TableCell>
-                  <TableCell sx={{ ...CELL_SX, ...TRUNCATE, fontSize: 11.5, color: faradayTokens.color.ink.secondary }} title={exp.type}>
-                    {exp.type.replace(/_/g, " ")}
-                  </TableCell>
                   <TableCell sx={{ ...CELL_SX, ...TRUNCATE }} title={exp.catalyst ?? ""}>
                     {exp.catalyst ?? "—"}
                   </TableCell>
@@ -251,7 +255,7 @@ export function ListView({ experiments }: Props) {
                   <TableCell align="right" sx={{ ...CELL_SX, fontFeatureSettings: TNUM, fontWeight: 600 }}>
                     {exp.yield_pct != null ? `${exp.yield_pct.toFixed(1)}%` : "—"}
                   </TableCell>
-                  <TableCell sx={{ ...CELL_SX, fontFeatureSettings: TNUM, color: faradayTokens.color.ink.secondary }}>
+                  <TableCell sx={{ ...CELL_SX, fontFeatureSettings: TNUM, color: faradayTokens.color.ink.secondary, whiteSpace: "nowrap" }}>
                     {exp.started_at ? exp.started_at.slice(0, 10) : "—"}
                   </TableCell>
                   <TableCell sx={CELL_SX}>
