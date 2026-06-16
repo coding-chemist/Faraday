@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test lint format clean
+.PHONY: install dev api worker flower web up down test lint format clean seed seed-clear
 
 install:
 	uv sync
@@ -23,6 +23,12 @@ up:
 
 down:
 	docker compose -f infra/docker-compose.yml down
+
+seed:
+	uv run python scripts/seed.py
+
+seed-clear:
+	uv run python scripts/seed.py --clear
 
 test:
 	uv run pytest

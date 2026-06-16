@@ -11,14 +11,21 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExperimentType(StrEnum):
-    """Categories chosen to match the v0.1 template library + Lab Memory Ask queries."""
+    """Categories chosen to match the v0.1 template library + Lab Memory Ask queries.
+
+    The five seed types (Suzuki, Buchwald, amide coupling, reductive amination,
+    carbonyl reduction) reflect Roughley & Jordan J. Med. Chem. 2011 reaction-frequency
+    analysis of medchem literature.
+    """
     SUZUKI_COUPLING = "suzuki_coupling"
     BUCHWALD_HARTWIG = "buchwald_hartwig"
+    AMIDE_COUPLING = "amide_coupling"
+    REDUCTIVE_AMINATION = "reductive_amination"
+    CARBONYL_REDUCTION = "carbonyl_reduction"
     RECRYSTALLIZATION = "recrystallization"
     COLUMN_CHROMATOGRAPHY = "column_chromatography"
     NMR_CHARACTERIZATION = "nmr_characterization"
     HPLC_PURITY = "hplc_purity"
-    REDUCTION = "reduction"
     OXIDATION = "oxidation"
     ESTERIFICATION = "esterification"
     OTHER = "other"
