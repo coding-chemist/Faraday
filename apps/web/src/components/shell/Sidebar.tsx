@@ -1,54 +1,56 @@
 // Left sidebar with the F+ logo, primary nav, and Lab Memory sub-nav.
 //
-// Active state derives from current pathname. Items that route to pages
-// we haven't built yet (Notebook, Reagents, Data, Structure, Protocols,
-// Templates, Settings) are rendered with reduced opacity + "coming" tooltip
-// so the chrome feels complete without misleading clicks.
+// Icons are custom hand-drawn line-work SVGs (not MUI defaults) to match
+// the editorial register of the mockup. Active state derives from current
+// pathname. Items pointing to pages we haven't built yet show a coming-soon
+// tooltip so the chrome looks alive without misleading clicks.
 
-import BarChartIcon from "@mui/icons-material/BarChart";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
-import DescriptionIcon from "@mui/icons-material/DescriptionOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import GridViewIcon from "@mui/icons-material/GridViewOutlined";
-import HubIcon from "@mui/icons-material/Hub";
-import ListAltIcon from "@mui/icons-material/ListAltOutlined";
-import PsychologyAltIcon from "@mui/icons-material/PsychologyAltOutlined";
-import ScienceIcon from "@mui/icons-material/ScienceOutlined";
-import SearchIcon from "@mui/icons-material/SearchOutlined";
-import SettingsIcon from "@mui/icons-material/SettingsOutlined";
-import VisibilityIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, Tooltip } from "@mui/material";
 import type { ComponentType } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { faradayTokens } from "../../design/theme";
 import { Logo } from "./Logo";
+import {
+  AskIcon,
+  CompareIcon,
+  DataIcon,
+  LabMemoryIcon,
+  NotebookIcon,
+  ProtocolsIcon,
+  ReagentsIcon,
+  SettingsIcon,
+  StructureIcon,
+  TemplatesIcon,
+  WatchIcon,
+} from "./icons";
 
 interface NavItem {
   label: string;
   href: string;
-  icon: ComponentType<{ sx?: object }>;
+  icon: ComponentType;
   /** When true, the item is rendered greyed-out with a 'coming soon' tooltip. */
   comingSoon?: boolean;
   children?: NavItem[];
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { label: "Notebook", href: "/notebook", icon: DescriptionIcon, comingSoon: true },
-  { label: "Reagents", href: "/reagents", icon: ScienceIcon, comingSoon: true },
-  { label: "Data", href: "/data", icon: BarChartIcon, comingSoon: true },
-  { label: "Structure", href: "/structure", icon: HubIcon, comingSoon: true },
-  { label: "Protocols", href: "/protocols", icon: ListAltIcon, comingSoon: true },
-  { label: "Templates", href: "/templates", icon: GridViewIcon, comingSoon: true },
+  { label: "Notebook", href: "/notebook", icon: NotebookIcon, comingSoon: true },
+  { label: "Reagents", href: "/reagents", icon: ReagentsIcon, comingSoon: true },
+  { label: "Data", href: "/data", icon: DataIcon, comingSoon: true },
+  { label: "Structure", href: "/structure", icon: StructureIcon, comingSoon: true },
+  { label: "Protocols", href: "/protocols", icon: ProtocolsIcon, comingSoon: true },
+  { label: "Templates", href: "/templates", icon: TemplatesIcon, comingSoon: true },
   {
     label: "Lab Memory",
     href: "/memory",
-    icon: PsychologyAltIcon,
+    icon: LabMemoryIcon,
     children: [
-      { label: "Watch", href: "/memory/watch", icon: VisibilityIcon, comingSoon: true },
-      { label: "Ask", href: "/memory/ask", icon: SearchIcon },
-      { label: "Compare", href: "/memory/compare", icon: CompareArrowsIcon, comingSoon: true },
+      { label: "Watch", href: "/memory/watch", icon: WatchIcon, comingSoon: true },
+      { label: "Ask", href: "/memory/ask", icon: AskIcon },
+      { label: "Compare", href: "/memory/compare", icon: CompareIcon, comingSoon: true },
     ],
   },
 ];
@@ -77,11 +79,11 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
         alignItems: "center",
         gap: 1.5,
         px: 1.5,
-        py: 1,
+        py: 1.1,
         ml: depth * 2,
         borderRadius: 1.5,
         fontFamily: faradayTokens.font.body,
-        fontSize: 14,
+        fontSize: 14.5,
         fontWeight: active ? 600 : 500,
         color: active
           ? faradayTokens.color.forest[900]
@@ -97,7 +99,19 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
         },
       }}
     >
-      <Icon sx={{ fontSize: 20, color: "inherit" }} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 20,
+          height: 20,
+          color: "inherit",
+          flexShrink: 0,
+        }}
+      >
+        <Icon />
+      </Box>
       <Box sx={{ flex: 1 }}>{item.label}</Box>
       {isExpandable && (expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />)}
     </Box>

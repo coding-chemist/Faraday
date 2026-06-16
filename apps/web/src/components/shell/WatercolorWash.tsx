@@ -1,11 +1,13 @@
-// Realistic watercolor backdrop — SVG with multiple overlapping radial gradients,
-// fractal-noise paper texture, and soft edge bleed. Matches the spec §3.0.4
-// "naturalist editorial style" / "soft watercolor backdrop" for product UI.
+// Realistic watercolor backdrop — SVG with discrete color "puddles", soft
+// edge bleed via feDisplacementMap, and paper-grain texture via feTurbulence.
 //
-// Variants:
+// The "pronounced" variant uses more puddles + bigger displacement to read
+// like real watercolor paint on paper.
+//
+// Three variants:
 //   subtle     main content panels — very faint sage wash + paper grain
-//   pronounced right rail / hero illustration backdrops — visible sage + mint
-//              variation, darker in corners, watercolor edge
+//   pronounced right rail / hero illustration — visible sage + mint
+//              variation, darker forest in corners, watercolor edge bleed
 //   card       inner card backdrop — barely-there mint hint
 
 import { useId } from "react";
@@ -14,22 +16,31 @@ type Variant = "subtle" | "pronounced" | "card";
 
 interface Props {
   variant?: Variant;
-  /** Position absolute fill behind content (default true). */
   fill?: boolean;
-  /** Override seed for reproducible-but-distinct washes on each component. */
   seed?: number;
 }
 
-export function WatercolorWash({ variant = "subtle", fill = true, seed = 3 }: Props) {
-  // useId gives unique filter/gradient IDs per instance so multiple washes coexist
-  const uid = useId().replace(/:/g, "");
+interface WashSpec {
+  cx: number;
+  cy: number;
+  r: number;
+  color: string;
+  opacity: number;
+}
 
+interface VariantConfig {
+  base: string;
+  paperFrequency: number;
+  paperOpacity: number;
+  edgeFrequency: number;
+  edgeScale: number;
+  washes: WashSpec[];
+}
+
+export function WatercolorWash({ variant = "subtle", fill = true, seed = 3 }: Props) {
+  const uid = useId().replace(/:/g, "");
   const noiseId = `wc-noise-${uid}`;
   const edgeId = `wc-edge-${uid}`;
-  const wash1Id = `wc-w1-${uid}`;
-  const wash2Id = `wc-w2-${uid}`;
-  const wash3Id = `wc-w3-${uid}`;
-  const wash4Id = `wc-w4-${uid}`;
 
   const cfg = VARIANT_CONFIG[variant];
 
@@ -50,7 +61,7 @@ export function WatercolorWash({ variant = "subtle", fill = true, seed = 3 }: Pr
       }
     >
       <defs>
-        {/* Paper grain — fractal noise tinted to a near-paper hue, low opacity */}
+        {/* Paper grain */}
         <filter id={noiseId}>
           <feTurbulence
             type="fractalNoise"
@@ -66,39 +77,34 @@ export function WatercolorWash({ variant = "subtle", fill = true, seed = 3 }: Pr
           />
         </filter>
 
-        {/* Watercolor edge — slight displacement so washes bleed organically */}
-        <filter id={edgeId} x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency={cfg.edgeFrequency} numOctaves={3} seed={seed + 7} />
+        {/* Watercolor edge bleed — feDisplacementMap on the wash group */}
+        <filter id={edgeId} x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency={cfg.edgeFrequency}
+            numOctaves={3}
+            seed={seed + 7}
+          />
           <feDisplacementMap in="SourceGraphic" scale={cfg.edgeScale} />
         </filter>
 
-        {cfg.washes.map((w, i) => {
-          const ids = [wash1Id, wash2Id, wash3Id, wash4Id];
-          return (
-            <radialGradient
-              key={i}
-              id={ids[i]}
-              cx={`${w.cx}%`}
-              cy={`${w.cy}%`}
-              r={`${w.r}%`}
-            >
-              <stop offset="0%" stopColor={w.color} stopOpacity={w.opacity} />
-              <stop offset="60%" stopColor={w.color} stopOpacity={w.opacity * 0.4} />
-              <stop offset="100%" stopColor={w.color} stopOpacity={0} />
-            </radialGradient>
-          );
-        })}
+        {cfg.washes.map((w, i) => (
+          <radialGradient key={i} id={`wc-w-${uid}-${i}`} cx={`${w.cx}%`} cy={`${w.cy}%`} r={`${w.r}%`}>
+            <stop offset="0%" stopColor={w.color} stopOpacity={w.opacity} />
+            <stop offset="50%" stopColor={w.color} stopOpacity={w.opacity * 0.55} />
+            <stop offset="100%" stopColor={w.color} stopOpacity={0} />
+          </radialGradient>
+        ))}
       </defs>
 
-      {/* Base paper color */}
+      {/* Base paper */}
       <rect width="100%" height="100%" fill={cfg.base} />
 
-      {/* Layered washes with soft edge displacement */}
+      {/* Layered washes with organic edge displacement */}
       <g filter={`url(#${edgeId})`}>
-        {cfg.washes.map((_, i) => {
-          const ids = [wash1Id, wash2Id, wash3Id, wash4Id];
-          return <rect key={i} width="100%" height="100%" fill={`url(#${ids[i]})`} />;
-        })}
+        {cfg.washes.map((_, i) => (
+          <rect key={i} width="100%" height="100%" fill={`url(#wc-w-${uid}-${i})`} />
+        ))}
       </g>
 
       {/* Paper grain overlay */}
@@ -107,61 +113,55 @@ export function WatercolorWash({ variant = "subtle", fill = true, seed = 3 }: Pr
   );
 }
 
-interface WashSpec {
-  cx: number;
-  cy: number;
-  r: number;
-  color: string;
-  opacity: number;
-}
-
-interface VariantConfig {
-  base: string;
-  paperFrequency: number;
-  paperOpacity: number;
-  edgeFrequency: number;
-  edgeScale: number;
-  washes: WashSpec[];
-}
-
 const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
   subtle: {
-    base: "#F7FAF6",
+    base: "#F4F9F2",
     paperFrequency: 0.7,
-    paperOpacity: 0.18,
+    paperOpacity: 0.22,
     edgeFrequency: 0.012,
-    edgeScale: 6,
+    edgeScale: 8,
     washes: [
-      { cx: 15, cy: 25, r: 65, color: "#E6F2EA", opacity: 0.85 },
-      { cx: 75, cy: 35, r: 55, color: "#C9E4D2", opacity: 0.45 },
-      { cx: 50, cy: 80, r: 70, color: "#EFF5EF", opacity: 0.7 },
-      { cx: 90, cy: 90, r: 50, color: "#8FB89A", opacity: 0.18 },
+      { cx: 12, cy: 18, r: 50, color: "#C9E4D2", opacity: 0.75 },
+      { cx: 78, cy: 32, r: 45, color: "#8FB89A", opacity: 0.45 },
+      { cx: 32, cy: 72, r: 55, color: "#E6F2EA", opacity: 0.85 },
+      { cx: 88, cy: 85, r: 50, color: "#52B788", opacity: 0.22 },
+      { cx: 60, cy: 50, r: 40, color: "#C9E4D2", opacity: 0.5 },
     ],
   },
   pronounced: {
-    base: "#EFF5EF",
+    base: "#E8F2EA",
     paperFrequency: 0.55,
-    paperOpacity: 0.28,
-    edgeFrequency: 0.018,
-    edgeScale: 14,
+    paperOpacity: 0.32,
+    edgeFrequency: 0.02,
+    edgeScale: 18,
     washes: [
-      { cx: 20, cy: 15, r: 70, color: "#C9E4D2", opacity: 0.85 },
-      { cx: 75, cy: 30, r: 60, color: "#8FB89A", opacity: 0.55 },
-      { cx: 50, cy: 75, r: 80, color: "#52B788", opacity: 0.28 },
-      { cx: 90, cy: 95, r: 55, color: "#2D6A4F", opacity: 0.16 },
+      // Top-left mint puddle
+      { cx: 18, cy: 12, r: 50, color: "#C9E4D2", opacity: 0.95 },
+      // Top-right sage patch
+      { cx: 80, cy: 22, r: 45, color: "#8FB89A", opacity: 0.75 },
+      // Mid-right forest deepening
+      { cx: 90, cy: 55, r: 40, color: "#52B788", opacity: 0.55 },
+      // Center sage wash
+      { cx: 45, cy: 50, r: 55, color: "#8FB89A", opacity: 0.45 },
+      // Bottom-left light wash
+      { cx: 15, cy: 75, r: 45, color: "#E6F2EA", opacity: 0.85 },
+      // Bottom-right deep forest shadow
+      { cx: 85, cy: 88, r: 38, color: "#2D6A4F", opacity: 0.28 },
+      // Scattered mint highlight
+      { cx: 50, cy: 90, r: 30, color: "#C9E4D2", opacity: 0.7 },
     ],
   },
   card: {
-    base: "#FFFFFF",
+    base: "#FBFDFA",
     paperFrequency: 0.8,
-    paperOpacity: 0.08,
+    paperOpacity: 0.1,
     edgeFrequency: 0.015,
-    edgeScale: 3,
+    edgeScale: 4,
     washes: [
-      { cx: 10, cy: 10, r: 80, color: "#E6F2EA", opacity: 0.5 },
-      { cx: 90, cy: 90, r: 70, color: "#C9E4D2", opacity: 0.3 },
-      { cx: 50, cy: 50, r: 60, color: "#EFF5EF", opacity: 0.4 },
-      { cx: 80, cy: 20, r: 40, color: "#8FB89A", opacity: 0.08 },
+      { cx: 15, cy: 20, r: 65, color: "#E6F2EA", opacity: 0.65 },
+      { cx: 85, cy: 80, r: 60, color: "#C9E4D2", opacity: 0.4 },
+      { cx: 50, cy: 50, r: 50, color: "#EFF5EF", opacity: 0.5 },
+      { cx: 80, cy: 25, r: 30, color: "#8FB89A", opacity: 0.12 },
     ],
   },
 };

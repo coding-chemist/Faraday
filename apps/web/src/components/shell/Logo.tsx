@@ -1,5 +1,5 @@
-// The F+ tile — deep forest square with white serif F and a small sparkle plus.
-// Matches the corner sigil shown on every page mockup.
+// The F+ tile — deep forest square with white serif F and a small sparkle plus
+// in the top-right corner. Matches the corner sigil on every page mockup.
 
 import { faradayTokens } from "../../design/theme";
 
@@ -25,19 +25,27 @@ export function Logo({ size = 56 }: Props) {
         rx={12}
         fill={faradayTokens.color.forest[700]}
       />
+      {/* Serif F */}
       <text
-        x={18}
-        y={40}
-        fontFamily='"Fraunces", Georgia, serif'
-        fontSize={32}
+        x={14}
+        y={42}
+        fontFamily='"Fraunces", "Tiempos Headline", Georgia, serif'
+        fontSize={38}
         fontWeight={600}
         fill="#FFFFFF"
       >
         F
       </text>
-      <g transform="translate(38, 14)">
-        <line x1={0} y1={5} x2={10} y2={5} stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" />
-        <line x1={5} y1={0} x2={5} y2={10} stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" />
+      {/* Sparkle plus — small + symbol in the top-right */}
+      <g
+        transform="translate(42, 12)"
+        stroke="#FFFFFF"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        fill="none"
+      >
+        <line x1={0} y1={5} x2={10} y2={5} />
+        <line x1={5} y1={0} x2={5} y2={10} />
       </g>
     </svg>
   );
