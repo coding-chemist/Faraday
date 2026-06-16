@@ -12,6 +12,7 @@ hand-drawn fallback that looks worse than nothing).
 |---|---|---|
 | `eucalyptus.png` | RightRail | top-right corner of every right-rail panel |
 | `fern.png` | RightRail | bottom-left corner (rendered flipped vertically for visual variation) |
+| `watch.png` | WatchTeaser | "LAB MEMORY — watch" teaser hero illustration (centered, ~220px wide) |
 
 ## ChatGPT / DALL-E / Midjourney prompts
 
@@ -37,6 +38,29 @@ Strict requirements:
   space around it
 - AVOID: photorealism, watercolor wash, color fills, cartoonish
   exaggeration, text labels, signature
+```
+
+### `watch.png`
+
+```
+A soft naturalist line-art illustration of a thought-cloud floating in
+air, with a small open lab notebook and a small chart paper visible
+inside the cloud (as if the cloud is "remembering" them). Trailing
+beneath the cloud: three or four small thought-bubbles in descending
+size, suggesting the cloud is forming. Style: hand-drawn, slightly
+imperfect linework like a personal sketchbook entry from a 1950s
+chemistry journal.
+
+Strict requirements:
+- 600×400 PNG with FULLY TRANSPARENT background
+- Line-only — single hairline weight (~3 pixels) in deep forest green
+  (#1B4332). NO fills, NO gradients, NO shadows, NO color washes.
+- The cloud is centered horizontally in the upper third of the canvas;
+  thought-bubbles trail down + slightly left into the lower middle
+- Inside the cloud: a recognizable mini open-book and a mini chart
+  panel (graph with axes + a wavy line), drawn at icon scale
+- AVOID: photorealism, watercolor wash, color, cartoonish faces or
+  features, text labels, signature
 ```
 
 ### `fern.png`
