@@ -1,9 +1,9 @@
-"""Real-LLM tests for QueryParserService. Gated behind the `llm` pytest marker.
+"""Integration tests for engine/services/query_parser_service.py — real LLM.
 
 Run with:  pytest -m llm  (requires Ollama running with qwen2.5:7b pulled, or
                            OLLAMA_HOST + OLLAMA_API_KEY set for Ollama Cloud)
 
-These are slow (~2-15s per query). Default pytest run skips them.
+Default pytest run skips these via the addopts = "-m 'not llm'" config.
 """
 import pytest
 
@@ -85,7 +85,6 @@ def test_intent_is_populated(parser):
 def test_heatmap_catalyst_by_solvent(parser):
     spec = parser.parse("Show yield by catalyst across solvents")
     assert spec.chart_type == "heatmap"
-    # Both dims set, both differ
     assert spec.group_by in {"catalyst", "solvent"}
     assert spec.group_by_secondary in {"catalyst", "solvent"}
     assert spec.group_by != spec.group_by_secondary
