@@ -4,8 +4,36 @@ Thumbs.db
 ~$*
 .vscode/
 .idea/
+
+# Node / Vite
 node_modules/
+dist/
+.vite/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.log
+
+# Env
 .env
 .env.local
+.env.*.local
+
+# Faraday runtime artifacts
+data/
+*.db
+*.sqlite
+*.sqlite3
+faiss_index/
+celerybeat-schedule
+celerybeat-schedule.db
