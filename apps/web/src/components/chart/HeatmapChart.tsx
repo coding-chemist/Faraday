@@ -70,96 +70,115 @@ export function HeatmapChart({ data }: Props) {
   const leftPad = 140;
   const topPad = 40;
   const bottomPad = 64;
-  const width = leftPad + layout.xCats.length * cellW + 20;
+  // Split into two SVGs side-by-side so the Y axis stays visible when the
+  // cells region scrolls horizontally — same frozen-first-column pattern
+  // Excel / Google Sheets use.
+  const cellsRegionWidth = layout.xCats.length * cellW + 20;
   const height = topPad + layout.yCats.length * cellH + bottomPad;
 
   return (
-    <div style={{ position: "relative", width: "100%", overflowX: "auto" }}>
-      <svg width={width} height={height}>
-        {/* X axis tick labels — horizontal, truncated, full name on hover */}
-        {layout.xCats.map((cat, i) => (
+    <div style={{ position: "relative", width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "stretch" }}>
+        {/* Frozen left axis — Y tick labels + Y axis title. Sits outside the
+            overflow container, so it doesn't move when the cells region
+            scrolls horizontally. */}
+        <svg
+          width={leftPad}
+          height={height}
+          style={{ flexShrink: 0, display: "block" }}
+          aria-hidden="false"
+        >
+          {layout.yCats.map((cat, j) => (
+            <text
+              key={cat}
+              x={leftPad - 12}
+              y={topPad + j * cellH + cellH / 2 + 4}
+              textAnchor="end"
+              style={axisTickStyle}
+            >
+              <title>{cat}</title>
+              {shortLabel(cat, 16)}
+            </text>
+          ))}
           <text
-            key={cat}
-            x={leftPad + i * cellW + cellW / 2}
-            y={topPad - 12}
+            transform={`rotate(-90, 20, ${topPad + (layout.yCats.length * cellH) / 2})`}
+            x={20}
+            y={topPad + (layout.yCats.length * cellH) / 2}
             textAnchor="middle"
-            style={axisTickStyle}
+            style={axisLabelStyle}
           >
-            <title>{cat}</title>
-            {shortLabel(cat, 12)}
+            {data.y_label}
           </text>
-        ))}
+        </svg>
 
-        {/* Y axis tick labels — truncated to fit leftPad, full name on hover */}
-        {layout.yCats.map((cat, j) => (
-          <text
-            key={cat}
-            x={leftPad - 12}
-            y={topPad + j * cellH + cellH / 2 + 4}
-            textAnchor="end"
-            style={axisTickStyle}
-          >
-            <title>{cat}</title>
-            {shortLabel(cat, 16)}
-          </text>
-        ))}
+        {/* Scrollable cells region — X labels, cells, and X axis title.
+            Only this band moves under the user's horizontal scroll. */}
+        <div style={{ overflowX: "auto", flex: 1, minWidth: 0 }}>
+          <svg width={cellsRegionWidth} height={height} style={{ display: "block" }}>
+            {/* X axis tick labels — horizontal, truncated, full name on hover */}
+            {layout.xCats.map((cat, i) => (
+              <text
+                key={cat}
+                x={i * cellW + cellW / 2}
+                y={topPad - 12}
+                textAnchor="middle"
+                style={axisTickStyle}
+              >
+                <title>{cat}</title>
+                {shortLabel(cat, 12)}
+              </text>
+            ))}
 
-        {/* Cells */}
-        {layout.xCats.map((x, i) =>
-          layout.yCats.map((y, j) => {
-            const cell = layout.cellsByKey.get(`${x}|${y}`);
-            const cx = leftPad + i * cellW;
-            const cy = topPad + j * cellH;
-            const fill = cell?.value != null ? heatmapColor(cell.value, layout.vmin, layout.vmax) : faradayTokens.color.surface.muted;
-            return (
-              <g key={`${x}|${y}`}>
-                <rect
-                  x={cx}
-                  y={cy}
-                  width={cellW - 2}
-                  height={cellH - 2}
-                  fill={fill}
-                  stroke={GRID_STROKE}
-                  strokeWidth={cell ? 1 : 0.5}
-                  strokeDasharray={cell ? "0" : "3 3"}
-                  onMouseEnter={() => setHover(cell ?? null)}
-                  onMouseLeave={() => setHover(null)}
-                  style={{ cursor: cell ? "pointer" : "default" }}
-                />
-                {cell?.value != null && (
-                  <text
-                    x={cx + cellW / 2 - 1}
-                    y={cy + cellH / 2 + 4}
-                    textAnchor="middle"
-                    style={{ ...axisTickStyle, fill: faradayTokens.color.ink.primary, fontWeight: 500 }}
-                  >
-                    {cell.value.toFixed(1)}
-                  </text>
-                )}
-              </g>
-            );
-          })
-        )}
+            {/* Cells */}
+            {layout.xCats.map((x, i) =>
+              layout.yCats.map((y, j) => {
+                const cell = layout.cellsByKey.get(`${x}|${y}`);
+                const cx = i * cellW;
+                const cy = topPad + j * cellH;
+                const fill = cell?.value != null
+                  ? heatmapColor(cell.value, layout.vmin, layout.vmax)
+                  : faradayTokens.color.surface.muted;
+                return (
+                  <g key={`${x}|${y}`}>
+                    <rect
+                      x={cx}
+                      y={cy}
+                      width={cellW - 2}
+                      height={cellH - 2}
+                      fill={fill}
+                      stroke={GRID_STROKE}
+                      strokeWidth={cell ? 1 : 0.5}
+                      strokeDasharray={cell ? "0" : "3 3"}
+                      onMouseEnter={() => setHover(cell ?? null)}
+                      onMouseLeave={() => setHover(null)}
+                      style={{ cursor: cell ? "pointer" : "default" }}
+                    />
+                    {cell?.value != null && (
+                      <text
+                        x={cx + cellW / 2 - 1}
+                        y={cy + cellH / 2 + 4}
+                        textAnchor="middle"
+                        style={{ ...axisTickStyle, fill: faradayTokens.color.ink.primary, fontWeight: 500 }}
+                      >
+                        {cell.value.toFixed(1)}
+                      </text>
+                    )}
+                  </g>
+                );
+              })
+            )}
 
-        {/* Axis labels */}
-        <text
-          x={leftPad + (layout.xCats.length * cellW) / 2}
-          y={height - 20}
-          textAnchor="middle"
-          style={axisLabelStyle}
-        >
-          {data.x_label}
-        </text>
-        <text
-          transform={`rotate(-90, 20, ${topPad + (layout.yCats.length * cellH) / 2})`}
-          x={20}
-          y={topPad + (layout.yCats.length * cellH) / 2}
-          textAnchor="middle"
-          style={axisLabelStyle}
-        >
-          {data.y_label}
-        </text>
-      </svg>
+            <text
+              x={(layout.xCats.length * cellW) / 2}
+              y={height - 20}
+              textAnchor="middle"
+              style={axisLabelStyle}
+            >
+              {data.x_label}
+            </text>
+          </svg>
+        </div>
+      </div>
 
       {hover && (
         <div
