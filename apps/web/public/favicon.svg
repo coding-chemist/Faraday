@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="14" fill="#2D6A4F"/>
+  <text x="22" y="48" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700" fill="#FFFFFF">F</text>
+  <g transform="translate(50 14)" fill="#FFFFFF">
+    <path d="M 0 -6 L 1.6 -1.6 L 6 0 L 1.6 1.6 L 0 6 L -1.6 1.6 L -6 0 L -1.6 -1.6 Z"/>
+  </g>
+</svg>

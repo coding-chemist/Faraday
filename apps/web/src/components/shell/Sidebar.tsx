@@ -166,18 +166,42 @@ export function Sidebar() {
         flexShrink: 0,
         background: faradayTokens.color.surface.base,
         borderRight: `1px solid ${faradayTokens.color.forest[100]}`,
+        // The parent flex row stretches us full-height; we then split that
+        // height into three vertical bands: header (logo), middle (scrollable
+        // nav), footer (Settings, always visible). Same pattern Firefly,
+        // Figma, Finder use — utility actions never need a scroll to reach.
         display: "flex",
         flexDirection: "column",
-        py: 3,
-        px: 2.5,
-        gap: 0.5,
+        height: "100%",
+        minHeight: 0,
       }}
     >
-      <Box sx={{ mb: 3, ml: 1 }}>
-        <Logo size={56} />
+      <Box sx={{ pt: 3, pb: 2, px: 2.5, flexShrink: 0 }}>
+        <Box sx={{ ml: 1 }}>
+          <Logo size={56} />
+        </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          px: 2.5,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+          // Hide the scroll track until needed and keep it subtle when it shows.
+          scrollbarWidth: "thin",
+          scrollbarColor: `${faradayTokens.color.forest[100]} transparent`,
+          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar-thumb": {
+            background: faradayTokens.color.forest[100],
+            borderRadius: 3,
+          },
+          "&::-webkit-scrollbar-track": { background: "transparent" },
+        }}
+      >
         {PRIMARY_NAV.map((item) => {
           const isActiveTop = item.children
             ? item.children.some((c) => c.href === pathname) || pathname === item.href
@@ -205,9 +229,19 @@ export function Sidebar() {
         })}
       </Box>
 
-      <Box sx={{ flex: 1 }} />
-
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Box
+        sx={{
+          flexShrink: 0,
+          px: 2.5,
+          pt: 1.5,
+          pb: 3,
+          borderTop: `1px solid ${faradayTokens.color.forest[50]}`,
+          background: faradayTokens.color.surface.base,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+        }}
+      >
         {FOOTER_NAV.map((item) => (
           <NavRow key={item.href} item={item} active={item.href === pathname} />
         ))}
