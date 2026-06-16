@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run
+.PHONY: install dev api worker flower web up down test test-llm lint format clean seed seed-clear embed seed-and-embed parse docker-hf-build docker-hf-run web-build web-preview
 
 install:
 	uv sync
@@ -72,3 +72,11 @@ docker-hf-run:
 	  -e FARADAY_LLM_CONFIG__API_KEY="$$FARADAY_LLM_CONFIG__API_KEY" \
 	  -e FARADAY_CORS_ORIGINS="$${FARADAY_CORS_ORIGINS:-http://localhost:5173}" \
 	  faraday-hf
+
+# --- Vercel production bundle smoke test ---
+
+web-build:
+	cd apps/web && npm run build
+
+web-preview: web-build
+	cd apps/web && npm run preview
