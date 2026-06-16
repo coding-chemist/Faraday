@@ -6,6 +6,13 @@ from faraday_engine.domain.experiment import ExperimentType
 from faraday_engine.domain.experiment import Reagent
 from faraday_engine.domain.experiment import ReagentRole
 from faraday_engine.domain.experiment import Result
+from faraday_engine.domain.analysis_result import AnalysisResult
+from faraday_engine.domain.analysis_result import ChartData
+from faraday_engine.domain.analysis_result import ChartPoint
+from faraday_engine.domain.analysis_result import HeatmapCell
+from faraday_engine.domain.analysis_result import HistogramBin
+from faraday_engine.domain.analysis_result import MatchedExperiment
+from faraday_engine.domain.analysis_result import SummaryCard
 from faraday_engine.domain.query_spec import Aggregation
 from faraday_engine.domain.query_spec import ChartType
 from faraday_engine.domain.query_spec import GroupBy

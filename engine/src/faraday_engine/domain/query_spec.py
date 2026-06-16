@@ -120,3 +120,23 @@ class QuerySpec(BaseModel):
             # the schema clean avoids analyzer/renderer surprises.
             object.__setattr__(self, "group_by_secondary", GroupBy.NONE.value)
         return self
+
+    def to_filters(self, limit: int = 10_000):
+        """Translate the filter dimensions to ExperimentFilters for the repository.
+
+        Import is local to avoid a circular dependency (ExperimentFilters lives in
+        the same package).
+        """
+        from faraday_engine.domain.experiment import ExperimentFilters
+
+        return ExperimentFilters(
+            type=self.reaction_type,
+            status=self.status,
+            catalyst_name=self.catalyst_name,
+            solvent_name=self.solvent_name,
+            yield_min=self.yield_min,
+            yield_max=self.yield_max,
+            date_from=self.date_from,
+            date_to=self.date_to,
+            limit=limit,
+        )
