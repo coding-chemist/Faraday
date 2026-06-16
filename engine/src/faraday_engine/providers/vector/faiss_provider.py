@@ -28,7 +28,17 @@ class FAISSProvider(VectorProvider):
         self._ids_file = self._dir / "ids.json"
         self._index: faiss.Index | None = None
         self._ids: list[str] = []
+        self._loaded_mtime: float = 0.0
         self.load()
+
+    def _reload_if_stale(self) -> None:
+        """If the on-disk index is newer than what we loaded (another process wrote),
+        reload. Lets API + worker share a FAISS file without a separate vector server."""
+        if not self._index_file.exists():
+            return
+        current_mtime = self._index_file.stat().st_mtime
+        if current_mtime > self._loaded_mtime:
+            self.load()
 
     def _ensure_index(self) -> faiss.Index:
         if self._index is None:
@@ -66,6 +76,7 @@ class FAISSProvider(VectorProvider):
         log.debug("faiss.upsert", count=len(items), total=len(self._ids))
 
     def search(self, vector: list[float], k: int = 20) -> list[ScoredId]:
+        self._reload_if_stale()
         if self._index is None or self._index.ntotal == 0:
             return []
         q = np.asarray([vector], dtype=np.float32)
@@ -98,10 +109,12 @@ class FAISSProvider(VectorProvider):
             return
         faiss.write_index(self._index, str(self._index_file))
         self._ids_file.write_text(json.dumps(self._ids))
+        self._loaded_mtime = self._index_file.stat().st_mtime
         log.info("faiss.persist", path=str(self._index_file), count=len(self._ids))
 
     def load(self) -> None:
         if self._index_file.exists() and self._ids_file.exists():
             self._index = faiss.read_index(str(self._index_file))
             self._ids = json.loads(self._ids_file.read_text())
+            self._loaded_mtime = self._index_file.stat().st_mtime
             log.info("faiss.load", path=str(self._index_file), count=len(self._ids))

@@ -12,6 +12,7 @@ celery_app = Celery(
     backend=settings.celery_result_backend,
     include=[
         "faraday_worker.tasks.hello_tasks",
+        "faraday_worker.tasks.embedding_tasks",
     ],
 )
 

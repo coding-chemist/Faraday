@@ -11,6 +11,7 @@ Verb vocabulary (locked):
     analyze  compute over a dataset
     execute  run main operation (catch-all)
 """
+from faraday_engine.services.embedding_service import EmbeddingService
 from faraday_engine.services.experiment_service import ExperimentService
 
-__all__ = ["ExperimentService"]
+__all__ = ["EmbeddingService", "ExperimentService"]

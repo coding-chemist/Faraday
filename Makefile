@@ -1,4 +1,4 @@
-.PHONY: install dev api worker flower web up down test lint format clean seed seed-clear
+.PHONY: install dev api worker flower web up down test lint format clean seed seed-clear embed seed-and-embed
 
 install:
 	uv sync
@@ -29,6 +29,11 @@ seed:
 
 seed-clear:
 	uv run python scripts/seed.py --clear
+
+embed:
+	uv run python scripts/embed.py
+
+seed-and-embed: seed-clear embed
 
 test:
 	uv run pytest
