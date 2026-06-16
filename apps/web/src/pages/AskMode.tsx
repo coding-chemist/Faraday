@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Typography } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { AskResultView } from "../components/ask/AskResultView";
 import { LoadingSkeleton } from "../components/ask/LoadingSkeleton";
@@ -13,7 +14,11 @@ import { ApiError, ask } from "../lib/api";
 import type { AnalysisResult } from "../types/analysis";
 
 export function AskMode() {
-  const [query, setQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
+  const autoRun = searchParams.get("run") === "1";
+
+  const [query, setQuery] = useState(urlQuery);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +44,15 @@ export function AskMode() {
       setLoading(false);
     }
   };
+
+  // Deep-link: /memory/ask?q=...&run=1 auto-submits on mount
+  useEffect(() => {
+    if (autoRun && urlQuery && !result && !loading) {
+      handleSubmit(urlQuery);
+    }
+    // intentional one-shot on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRetry = () => {
     if (lastQuery) handleSubmit(lastQuery);
