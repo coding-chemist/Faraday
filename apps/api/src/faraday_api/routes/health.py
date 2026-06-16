@@ -18,10 +18,28 @@ router = APIRouter(tags=["health"])
 _STARTED_AT = time.time()
 
 
+class RootResponse(BaseModel):
+    service: str
+    version: str
+    docs: str
+    endpoints: list[str]
+
+
 class HealthResponse(BaseModel):
     status: str
     env: str
     uptime_s: float
+
+
+@router.get("/", response_model=RootResponse, include_in_schema=False)
+def root() -> RootResponse:
+    """Friendly landing for the HF Space 'App' tab — no UI here, just the API map."""
+    return RootResponse(
+        service="Faraday API",
+        version="0.1.0",
+        docs="/docs",
+        endpoints=["/health", "/health/llm", "/providers", "/memory/ask"],
+    )
 
 
 class ProvidersResponse(BaseModel):
