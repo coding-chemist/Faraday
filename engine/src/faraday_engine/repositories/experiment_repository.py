@@ -1,4 +1,8 @@
-"""ExperimentRepository — class.verb shape. Owns Experiment + its child entities (Reagent, Result)."""
+"""ExperimentRepository — class.verb shape. Owns Experiment + its child entities.
+
+Filter rules are declarative — adding a new filter is one FilterRule entry, not a
+new if/elif block in list().
+"""
 from datetime import datetime
 
 from sqlalchemy import select
@@ -11,10 +15,37 @@ from faraday_engine.domain.experiment import (
     ReagentRole,
     Result,
 )
+from faraday_engine.repositories.filter_spec import (
+    FilterRule,
+    apply_filter_rules,
+    eq,
+    ge,
+    le,
+)
 from faraday_engine.repositories.models import ExperimentORM, ReagentORM, ResultORM
 from faraday_shared.logging import get_logger
 
 log = get_logger(__name__)
+
+
+# Declarative filter rules — to add a filter, add a row here and a field to
+# ExperimentFilters. No changes to list() needed.
+_EXPERIMENT_FILTER_RULES: list[FilterRule] = [
+    FilterRule("type", ExperimentORM.type, eq, transform=lambda v: v.value),
+    FilterRule("status", ExperimentORM.status, eq, transform=lambda v: v.value),
+    FilterRule("solvent_name", ExperimentORM.solvent_name, eq),
+    FilterRule("date_from", ExperimentORM.created_at, ge),
+    FilterRule("date_to", ExperimentORM.created_at, le),
+    FilterRule("yield_min", ResultORM.yield_pct, ge, join=ResultORM),
+    FilterRule("yield_max", ResultORM.yield_pct, le, join=ResultORM),
+    FilterRule(
+        "catalyst_name",
+        ReagentORM.name,
+        eq,
+        join=ExperimentORM.reagents,
+        extra_where=(ReagentORM.role == ReagentRole.CATALYST.value),
+    ),
+]
 
 
 class ExperimentRepository:
@@ -37,34 +68,9 @@ class ExperimentRepository:
     def list(self, filters: ExperimentFilters | None = None) -> list[Experiment]:
         filters = filters or ExperimentFilters()
         stmt = select(ExperimentORM)
-
-        if filters.type is not None:
-            stmt = stmt.where(ExperimentORM.type == filters.type.value)
-        if filters.status is not None:
-            stmt = stmt.where(ExperimentORM.status == filters.status.value)
-        if filters.solvent_name is not None:
-            stmt = stmt.where(ExperimentORM.solvent_name == filters.solvent_name)
-        if filters.date_from is not None:
-            stmt = stmt.where(ExperimentORM.created_at >= filters.date_from)
-        if filters.date_to is not None:
-            stmt = stmt.where(ExperimentORM.created_at <= filters.date_to)
-
-        if filters.catalyst_name is not None:
-            stmt = stmt.join(ExperimentORM.reagents).where(
-                ReagentORM.role == ReagentRole.CATALYST.value,
-                ReagentORM.name == filters.catalyst_name,
-            )
-
-        if filters.yield_min is not None or filters.yield_max is not None:
-            stmt = stmt.join(ExperimentORM.result)
-            if filters.yield_min is not None:
-                stmt = stmt.where(ResultORM.yield_pct >= filters.yield_min)
-            if filters.yield_max is not None:
-                stmt = stmt.where(ResultORM.yield_pct <= filters.yield_max)
-
+        stmt = apply_filter_rules(stmt, filters, _EXPERIMENT_FILTER_RULES)
         stmt = stmt.order_by(ExperimentORM.created_at.desc())
         stmt = stmt.limit(filters.limit).offset(filters.offset)
-
         orms = self._session.scalars(stmt).unique().all()
         return [self._to_domain(o) for o in orms]
 
