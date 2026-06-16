@@ -31,10 +31,10 @@ from faraday_shared.logging import get_logger
 
 log = get_logger(__name__)
 
-router = APIRouter(tags=["ask"])
+router = APIRouter(tags=["memory"])
 
 
-@router.post("/ask", response_model=AnalysisResult)
+@router.post("/memory/ask", response_model=AnalysisResult)
 def ask(
     request: AskRequest,
     parser: QueryParserService = Depends(get_query_parser_service),

@@ -100,24 +100,24 @@ def _override_deps(fake_parser, fake_experiments):
 # --- Request validation ---
 
 def test_rejects_empty_query(client):
-    response = client.post("/ask", json={"query": ""})
+    response = client.post("/memory/ask", json={"query": ""})
     assert response.status_code == 422
 
 
 def test_rejects_query_below_min_length(client):
-    response = client.post("/ask", json={"query": "a"})
+    response = client.post("/memory/ask", json={"query": "a"})
     assert response.status_code == 422
 
 
 def test_rejects_missing_query_field(client):
-    response = client.post("/ask", json={})
+    response = client.post("/memory/ask", json={})
     assert response.status_code == 422
 
 
 # --- Happy path ---
 
 def test_returns_200_with_analysis_result(client):
-    response = client.post("/ask", json={"query": "Show low-yield Suzukis by catalyst"})
+    response = client.post("/memory/ask", json={"query": "Show low-yield Suzukis by catalyst"})
     assert response.status_code == 200
     body = response.json()
     assert "chart_data" in body
@@ -128,12 +128,12 @@ def test_returns_200_with_analysis_result(client):
 
 
 def test_chart_type_in_response_matches_spec(client):
-    response = client.post("/ask", json={"query": "anything"})
+    response = client.post("/memory/ask", json={"query": "anything"})
     assert response.json()["chart_data"]["chart_type"] == "bar"
 
 
 def test_summary_includes_of_total_subtext(client):
-    response = client.post("/ask", json={"query": "anything"})
+    response = client.post("/memory/ask", json={"query": "anything"})
     matched_card = next(
         c for c in response.json()["summary_cards"] if c["label"] == "Matched experiments"
     )
@@ -142,7 +142,7 @@ def test_summary_includes_of_total_subtext(client):
 
 
 def test_orchestration_calls_parser_then_lists(client, fake_parser, fake_experiments):
-    client.post("/ask", json={"query": "test query"})
+    client.post("/memory/ask", json={"query": "test query"})
     assert fake_parser.calls == ["test query"]
     assert len(fake_experiments.list_calls) == 1
     filters = fake_experiments.list_calls[0]
@@ -157,7 +157,7 @@ def test_parser_failure_returns_422(client, fake_parser):
         raise RuntimeError("LLM unreachable")
 
     fake_parser.parse = raise_parse
-    response = client.post("/ask", json={"query": "anything"})
+    response = client.post("/memory/ask", json={"query": "anything"})
     assert response.status_code == 422
     assert "Could not understand" in response.json()["detail"]
 
@@ -166,7 +166,7 @@ def test_parser_failure_returns_422(client, fake_parser):
 
 def test_request_id_header_echoed(client):
     response = client.post(
-        "/ask",
+        "/memory/ask",
         json={"query": "test"},
         headers={"x-request-id": "abc-123"},
     )

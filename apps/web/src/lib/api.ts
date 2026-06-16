@@ -13,7 +13,7 @@ export class ApiError extends Error {
 }
 
 export async function ask(query: string): Promise<AnalysisResult> {
-  const response = await fetch(`${API_BASE}/ask`, {
+  const response = await fetch(`${API_BASE}/memory/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query }),

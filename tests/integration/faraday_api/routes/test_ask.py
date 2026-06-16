@@ -36,7 +36,7 @@ def client():
 
 def test_canonical_low_yield_suzuki_query(client):
     response = client.post(
-        "/ask",
+        "/memory/ask",
         json={"query": "Show Suzuki couplings yield below 70% in last 6 months by catalyst"},
     )
     assert response.status_code == 200
@@ -49,7 +49,7 @@ def test_canonical_low_yield_suzuki_query(client):
 
 def test_compare_reagents_returns_bar_chart(client):
     response = client.post(
-        "/ask",
+        "/memory/ask",
         json={"query": "Compare HATU vs EDC amide coupling yields"},
     )
     assert response.status_code == 200
@@ -59,7 +59,7 @@ def test_compare_reagents_returns_bar_chart(client):
 
 def test_heatmap_query_returns_heatmap_cells(client):
     response = client.post(
-        "/ask",
+        "/memory/ask",
         json={"query": "Yield by catalyst across solvents"},
     )
     assert response.status_code == 200

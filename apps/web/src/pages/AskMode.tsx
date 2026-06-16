@@ -1,12 +1,13 @@
-import { Alert, Box, Button, Container, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
 
 import { AskResultView } from "../components/ask/AskResultView";
 import { LoadingSkeleton } from "../components/ask/LoadingSkeleton";
 import { QueryInput } from "../components/ask/QueryInput";
 import { SuggestedQueries } from "../components/ask/SuggestedQueries";
+import { WatchTeaser } from "../components/ask/WatchTeaser";
+import { AppShell } from "../components/shell";
 import { faradayTokens } from "../design/theme";
 import { ApiError, ask } from "../lib/api";
 import type { AnalysisResult } from "../types/analysis";
@@ -47,54 +48,21 @@ export function AskMode() {
   const showResult = result && !loading && result.total_matched > 0;
 
   return (
-    <Box
-      component="main"
-      sx={{ minHeight: "100vh", background: faradayTokens.color.surface.base }}
+    <AppShell
+      crumbs={[{ label: "Lab memory" }, { label: "Ask" }]}
+      rightRail={<WatchTeaser />}
     >
-      <Container maxWidth="lg" sx={{ pt: 8, pb: 12 }}>
-        <Box sx={{ textAlign: "center", mb: 5 }}>
-          <Box className="font-mono" sx={{ fontSize: 12, mb: 4 }}>
-            <RouterLink
-              to="/"
-              style={{ color: faradayTokens.color.forest[700], textDecoration: "none" }}
-            >
-              ← back to landing
-            </RouterLink>
-          </Box>
-          <Typography
-            component="h1"
-            sx={{
-              fontSize: { xs: 36, md: 56 },
-              fontFamily: faradayTokens.font.display,
-              fontWeight: 600,
-              color: faradayTokens.color.ink.primary,
-              mb: 1,
-              lineHeight: 1.05,
-            }}
-          >
-            Lab Memory
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: { xs: 16, md: 18 },
-              fontStyle: "italic",
-              color: faradayTokens.color.ink.secondary,
-            }}
-          >
-            Ask anything about your experiments.
-          </Typography>
-        </Box>
-
+      <Box sx={{ maxWidth: 980, mx: "auto" }}>
         <QueryInput onSubmit={handleSubmit} disabled={loading} initialValue={query} />
 
         {!result && !loading && !error && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 2.5 }}>
             <SuggestedQueries onSelect={handleSubmit} disabled={loading} />
           </Box>
         )}
 
         {loading && (
-          <Box sx={{ mt: 8 }} aria-live="polite" aria-busy="true">
+          <Box sx={{ mt: 6 }} aria-live="polite" aria-busy="true">
             <LoadingSkeleton />
           </Box>
         )}
@@ -141,7 +109,7 @@ export function AskMode() {
           <Box
             className="faraday-fade-in"
             sx={{
-              mt: 8,
+              mt: 6,
               textAlign: "center",
               maxWidth: 560,
               mx: "auto",
@@ -193,7 +161,7 @@ export function AskMode() {
             <AskResultView result={result!} />
           </Box>
         )}
-      </Container>
-    </Box>
+      </Box>
+    </AppShell>
   );
 }

@@ -58,7 +58,7 @@ export function Landing() {
         </Box>
 
         <Box className="mt-section font-mono text-sm" sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-          <RouterLink to="/ask" style={{ color: "#2D6A4F", textDecoration: "underline" }}>
+          <RouterLink to="/memory/ask" style={{ color: "#2D6A4F", textDecoration: "underline" }}>
             → open lab memory
           </RouterLink>
           <RouterLink to="/charts-demo" style={{ color: "#5C6360", textDecoration: "underline" }}>

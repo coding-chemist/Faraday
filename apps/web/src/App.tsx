@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AskMode } from "./pages/AskMode";
 import { ChartsDemo } from "./pages/ChartsDemo";
+import { ComingSoon } from "./pages/ComingSoon";
 import { Landing } from "./pages/Landing";
 
 export default function App() {
@@ -9,8 +10,29 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/ask" element={<AskMode />} />
+        <Route path="/memory/ask" element={<AskMode />} />
+        <Route
+          path="/memory/watch"
+          element={
+            <ComingSoon
+              title="Watch mode"
+              crumbs={[{ label: "Lab memory" }, { label: "Watch" }]}
+              blurb="A proactive sidebar that surfaces relevant past experiments while you write — your last runs with this catalyst, this solvent, this substrate."
+            />
+          }
+        />
+        <Route
+          path="/memory/compare"
+          element={
+            <ComingSoon
+              title="Compare mode"
+              crumbs={[{ label: "Lab memory" }, { label: "Compare" }]}
+              blurb="Side-by-side structured diff of 2–5 experiments. What changed in reagents, conditions, observations, results — line by line."
+            />
+          }
+        />
         <Route path="/charts-demo" element={<ChartsDemo />} />
+        <Route path="/ask" element={<AskMode />} />
       </Routes>
     </BrowserRouter>
   );
