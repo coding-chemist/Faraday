@@ -1,9 +1,6 @@
-// Left sidebar with the F+ logo, primary nav, and Lab Memory sub-nav.
-//
-// Icons are custom hand-drawn line-work SVGs (not MUI defaults) to match
-// the editorial register of the mockup. Active state derives from current
-// pathname. Items pointing to pages we haven't built yet show a coming-soon
-// tooltip so the chrome looks alive without misleading clicks.
+// Left sidebar — Lab Memory parent gets a featured green tile around its icon
+// (the brand-accent treatment shown in the mockup). When /icons/lab-memory.png
+// is present, it replaces the SVG fallback for that one icon.
 
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -33,6 +30,10 @@ interface NavItem {
   icon: ComponentType;
   /** When true, the item is rendered greyed-out with a 'coming soon' tooltip. */
   comingSoon?: boolean;
+  /** When true, the icon renders inside a featured forest-green tile (brand accent). */
+  featured?: boolean;
+  /** Optional PNG asset under public/icons/ used in place of the SVG icon. */
+  iconImage?: string;
   children?: NavItem[];
 }
 
@@ -47,6 +48,8 @@ const PRIMARY_NAV: NavItem[] = [
     label: "Lab Memory",
     href: "/memory",
     icon: LabMemoryIcon,
+    featured: true,
+    iconImage: "/icons/lab-memory.png",
     children: [
       { label: "Watch", href: "/memory/watch", icon: WatchIcon, comingSoon: true },
       { label: "Ask", href: "/memory/ask", icon: AskIcon },
@@ -71,6 +74,15 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
   const Icon = item.icon;
   const isExpandable = !!item.children?.length;
   const isComing = !!item.comingSoon;
+  const isFeatured = !!item.featured;
+
+  const iconColor = isFeatured
+    ? "#FFFFFF"
+    : active
+      ? faradayTokens.color.forest[900]
+      : isComing
+        ? faradayTokens.color.ink.tertiary
+        : faradayTokens.color.ink.secondary;
 
   const content = (
     <Box
@@ -84,13 +96,15 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
         borderRadius: 1.5,
         fontFamily: faradayTokens.font.body,
         fontSize: 14.5,
-        fontWeight: active ? 600 : 500,
+        fontWeight: active || isFeatured ? 600 : 500,
         color: active
           ? faradayTokens.color.forest[900]
-          : isComing
-            ? faradayTokens.color.ink.tertiary
-            : faradayTokens.color.ink.secondary,
-        background: active ? faradayTokens.color.surface.sunken : "transparent",
+          : isFeatured
+            ? faradayTokens.color.forest[900]
+            : isComing
+              ? faradayTokens.color.ink.tertiary
+              : faradayTokens.color.ink.secondary,
+        background: active && !isFeatured ? faradayTokens.color.surface.sunken : "transparent",
         transition: "background 180ms ease-out, color 180ms ease-out",
         cursor: isComing && !isExpandable ? "default" : "pointer",
         "&:hover": {
@@ -104,13 +118,39 @@ function NavRow({ item, active, depth = 0, expanded, onToggleExpand }: NavRowPro
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: 20,
-          height: 20,
-          color: "inherit",
+          width: isFeatured ? 30 : 20,
+          height: isFeatured ? 30 : 20,
+          borderRadius: isFeatured ? 1.5 : 0,
+          background: isFeatured ? faradayTokens.color.forest[700] : "transparent",
+          color: iconColor,
           flexShrink: 0,
         }}
       >
-        <Icon />
+        {item.iconImage ? (
+          <img
+            src={item.iconImage}
+            alt=""
+            width={isFeatured ? 20 : 16}
+            height={isFeatured ? 20 : 16}
+            style={{ display: "block" }}
+            onError={(e) => {
+              // PNG missing — fall back to inline SVG by hiding the img
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+              const sibling = (e.currentTarget as HTMLImageElement)
+                .nextElementSibling as HTMLElement | null;
+              if (sibling) sibling.style.display = "block";
+            }}
+          />
+        ) : null}
+        <Box
+          sx={{
+            display: item.iconImage ? "none" : "block",
+            color: "inherit",
+            lineHeight: 0,
+          }}
+        >
+          <Icon />
+        </Box>
       </Box>
       <Box sx={{ flex: 1 }}>{item.label}</Box>
       {isExpandable && (expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />)}

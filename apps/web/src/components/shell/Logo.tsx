@@ -1,5 +1,5 @@
-// The F+ tile — deep forest square with white serif F and a small sparkle plus
-// in the top-right corner. Matches the corner sigil on every page mockup.
+// The F+ tile — deep forest square with a serif F and a 4-point sparkle.
+// Sparkle replaces the previous plain plus sign per mockup.
 
 import { faradayTokens } from "../../design/theme";
 
@@ -17,36 +17,25 @@ export function Logo({ size = 56 }: Props) {
       aria-label="Faraday"
       style={{ display: "block" }}
     >
-      <rect
-        x={0}
-        y={0}
-        width={56}
-        height={56}
-        rx={12}
-        fill={faradayTokens.color.forest[700]}
-      />
-      {/* Serif F */}
+      <rect x={0} y={0} width={56} height={56} rx={12} fill={faradayTokens.color.forest[700]} />
+
+      {/* Serif F — Fraunces forced via inline style so SVG picks up the loaded webfont */}
       <text
         x={14}
-        y={42}
-        fontFamily='"Fraunces", "Tiempos Headline", Georgia, serif'
-        fontSize={38}
+        y={43}
+        fontSize={40}
         fontWeight={600}
         fill="#FFFFFF"
+        style={{ fontFamily: '"Fraunces", "Tiempos Headline", Georgia, serif' }}
       >
         F
       </text>
-      {/* Sparkle plus — small + symbol in the top-right */}
-      <g
-        transform="translate(42, 12)"
-        stroke="#FFFFFF"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        fill="none"
-      >
-        <line x1={0} y1={5} x2={10} y2={5} />
-        <line x1={5} y1={0} x2={5} y2={10} />
-      </g>
+
+      {/* 4-point sparkle (✦) — kite shape with long vertical points */}
+      <path
+        d="M44.5 11 L45.5 17.5 L52 18.5 L45.5 19.5 L44.5 26 L43.5 19.5 L37 18.5 L43.5 17.5 Z"
+        fill="#FFFFFF"
+      />
     </svg>
   );
 }
